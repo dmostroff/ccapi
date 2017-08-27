@@ -7,34 +7,66 @@ class Client_FinancialsHelper extends Base_dblayerHelper {
         $this->idcol_ = 'financial_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT financial_id, client_id
-	, annual_income
-	, credit_line
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_financials
+    SELECT client_financials.financial_id
+	, client_financials.client_id
+	, client_financials.annual_income
+	, client_financials.credit_line
+	, client_financials.valid_from
+	, client_financials.valid_to
+	, client_financials.recorded_on
+    FROM client_financials
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_person ON client_financials.client_id=client_person.client_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT financial_id, client_id
-	, annual_income
-	, credit_line
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_financials
-        WHERE financial_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE client_financials.financial_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['financial_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT client_financials.financial_id
+	, client_financials.client_id
+	, client_financials.annual_income
+	, client_financials.credit_line
+	, client_financials.valid_from
+	, client_financials.valid_to
+	, client_financials.recorded_on
+    FROM client_financials
+        INNER JOIN client_person ON client_financials.client_id=client_person.client_id
+    WHERE client_person.client_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -68,7 +100,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT financial_id FROM client_financials WHERE financial_id = ?;";
+                $sql1 = "SELECT financial_id FROM client_financials WHERE client_financials.financial_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -79,7 +111,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM client_financials WHERE financial_id = ?";
+        $sql = "DELETE FROM client_financials WHERE client_financials.financial_id=?";
         return dbconn::exec($dbc, $sql, [$args['financial_id']]);
     }
 }

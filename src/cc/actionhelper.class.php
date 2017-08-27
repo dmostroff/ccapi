@@ -7,36 +7,68 @@ class Cc_ActionHelper extends Base_dblayerHelper {
         $this->idcol_ = 'ccaction_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT ccaction_id, clicc_id
-	, ccaction
-	, action_type
-	, action_status
-	, due_date
-	, details
-	, recorded_on
-        FROM cc_action
+    SELECT cc_action.ccaction_id
+	, cc_action.clicc_id
+	, cc_action.ccaction
+	, cc_action.action_type
+	, cc_action.action_status
+	, cc_action.due_date
+	, cc_action.details
+	, cc_action.recorded_on
+    FROM cc_action
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_cc ON cc_action.clicc_id=client_cc.clicc_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT ccaction_id, clicc_id
-	, ccaction
-	, action_type
-	, action_status
-	, due_date
-	, details
-	, recorded_on
-        FROM cc_action
-        WHERE ccaction_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE cc_action.ccaction_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['ccaction_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT cc_action.ccaction_id
+	, cc_action.clicc_id
+	, cc_action.ccaction
+	, cc_action.action_type
+	, cc_action.action_status
+	, cc_action.due_date
+	, cc_action.details
+	, cc_action.recorded_on
+    FROM cc_action
+        INNER JOIN client_cc ON cc_action.clicc_id=client_cc.clicc_id
+    WHERE client_cc.clicc_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -72,7 +104,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT ccaction_id FROM cc_action WHERE ccaction_id = ?;";
+                $sql1 = "SELECT ccaction_id FROM cc_action WHERE cc_action.ccaction_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -83,7 +115,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM cc_action WHERE ccaction_id = ?";
+        $sql = "DELETE FROM cc_action WHERE cc_action.ccaction_id=?";
         return dbconn::exec($dbc, $sql, [$args['ccaction_id']]);
     }
 }

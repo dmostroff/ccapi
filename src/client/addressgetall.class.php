@@ -12,4 +12,5 @@ class Client_AddressGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

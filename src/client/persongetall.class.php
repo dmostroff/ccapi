@@ -12,4 +12,5 @@ class Client_PersonGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

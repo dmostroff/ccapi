@@ -7,36 +7,68 @@ class Cc_TransactionHelper extends Base_dblayerHelper {
         $this->idcol_ = 'cctrans_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT cctrans_id, clicc_id
-	, transaction_date
-	, transaction_type
-	, transaction_status
-	, cedit
-	, debit
-	, recorded_on
-        FROM cc_transaction
+    SELECT cc_transaction.cctrans_id
+	, cc_transaction.clicc_id
+	, cc_transaction.transaction_date
+	, cc_transaction.transaction_type
+	, cc_transaction.transaction_status
+	, cc_transaction.cedit
+	, cc_transaction.debit
+	, cc_transaction.recorded_on
+    FROM cc_transaction
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_cc ON cc_transaction.clicc_id=client_cc.clicc_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT cctrans_id, clicc_id
-	, transaction_date
-	, transaction_type
-	, transaction_status
-	, cedit
-	, debit
-	, recorded_on
-        FROM cc_transaction
-        WHERE cctrans_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE cc_transaction.cctrans_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['cctrans_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT cc_transaction.cctrans_id
+	, cc_transaction.clicc_id
+	, cc_transaction.transaction_date
+	, cc_transaction.transaction_type
+	, cc_transaction.transaction_status
+	, cc_transaction.cedit
+	, cc_transaction.debit
+	, cc_transaction.recorded_on
+    FROM cc_transaction
+        INNER JOIN client_cc ON cc_transaction.clicc_id=client_cc.clicc_id
+    WHERE client_cc.clicc_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -72,7 +104,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT cctrans_id FROM cc_transaction WHERE cctrans_id = ?;";
+                $sql1 = "SELECT cctrans_id FROM cc_transaction WHERE cc_transaction.cctrans_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -83,7 +115,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM cc_transaction WHERE cctrans_id = ?";
+        $sql = "DELETE FROM cc_transaction WHERE cc_transaction.cctrans_id=?";
         return dbconn::exec($dbc, $sql, [$args['cctrans_id']]);
     }
 }

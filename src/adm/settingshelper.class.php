@@ -7,24 +7,59 @@ class Adm_SettingsHelper extends Base_dblayerHelper {
         $this->idcol_ = 'prefix, keyname';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT prefix, keyname, keyvalue
-        FROM adm_settings
+    SELECT adm_settings.prefix
+	, adm_settings.keyname
+	, adm_settings.keyvalue
+    FROM adm_settings
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT prefix, keyname, keyvalue
-        FROM adm_settings
-        WHERE prefix = ? AND keyname = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE adm_settings.prefix=?
+	AND adm_settings.keyname=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['prefix'], $args['keyname']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT adm_settings.prefix
+	, adm_settings.keyname
+	, adm_settings.keyvalue
+    FROM adm_settings
+        
+    WHERE 
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -54,7 +89,8 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT prefix, keyname FROM adm_settings WHERE prefix = ? AND keyname = ?;";
+                $sql1 = "SELECT prefix, keyname FROM adm_settings WHERE adm_settings.prefix=?
+	AND adm_settings.keyname=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -65,7 +101,8 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM adm_settings WHERE prefix = ? AND keyname = ?";
+        $sql = "DELETE FROM adm_settings WHERE adm_settings.prefix=?
+	AND adm_settings.keyname=?";
         return dbconn::exec($dbc, $sql, [$args['prefix'], $args['keyname']]);
     }
 }

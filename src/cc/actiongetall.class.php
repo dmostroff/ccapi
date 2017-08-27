@@ -12,4 +12,5 @@ class Cc_ActionGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

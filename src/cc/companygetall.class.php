@@ -12,4 +12,5 @@ class Cc_CompanyGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

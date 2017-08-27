@@ -12,4 +12,5 @@ class Adm_UsersGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

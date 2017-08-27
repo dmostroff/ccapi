@@ -16,7 +16,7 @@ class Meta_ClassnameCreate extends Base_dblayer {
     public function invoke($request, $response, $args) {
         $dbc = $this->connect();
         $tablename = $args['table'];
-        $baseDir = '/home/DANO/projects/ccapi/src';
+        $baseDir = './src';
         // $baseDir = '/var/www/ccapi';
         try {
             $idCols = [];
@@ -35,6 +35,28 @@ class Meta_ClassnameCreate extends Base_dblayer {
                 }
                 if( $r['EXTRA'] == 'auto_increment' ) {
                     $autoIncCols[] = $r['COLUMN_NAME'];
+                }
+            }
+            $sql = <<<EOT
+SELECT REFERENCED_TABLE_NAME
+    , concat(REFERENCED_TABLE_NAME, '.', REFERENCED_COLUMN_NAME) as FKCOL
+    , concat(TABLE_NAME, '.', COLUMN_NAME, '=', REFERENCED_TABLE_NAME, '.', REFERENCED_COLUMN_NAME) AS FKEQ
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+WHERE TABLE_NAME = ? AND REFERENCED_TABLE_NAME is not null ORDER BY CONSTRAINT_NAME, ORDINAL_POSITION
+EOT;
+            $fkrows = dbconn::exec($dbc, $sql, [$tablename]);
+            $fks = [];
+            $innerJoinFk = "";
+            $whereFk = "";
+            foreach ($fkrows as $r) {
+                if (!isset( $fks[$r['REFERENCED_TABLE_NAME']])) {
+                    $fks[$r['REFERENCED_TABLE_NAME']] = $r['FKCOL'];
+                    $innerJoinFk .= "INNER JOIN " . $r['REFERENCED_TABLE_NAME'] . " ON " . $r['FKEQ'];
+                    $whereFk = $r['FKCOL'] . '=?';
+                } else {
+                    $fks[$r['REFERENCED_TABLE_NAME']][] = $r['FKCOL'];
+                    $innerJoinFk .= " AND " . $r['FKEQ'];
+                    $whereFk = " AND " . $r['FKCOL'].'=?';
                 }
             }
             $colNames = implode($cols, ", ");
@@ -63,7 +85,7 @@ class Meta_ClassnameCreate extends Base_dblayer {
             $filename = strtolower(str_replace( '_', '/', $classname)) . '.class.php';
             $res .= "cat<<EOF > {$filename}\n";
             $res .= "<?php\n";
-            $res .= $this->createHelperClass($classname, $tablename, $cols, $idCols, $insertCols, $autoIncCols);
+            $res .= $this->createHelperClass($classname, $tablename, $cols, $idCols, $insertCols, $autoIncCols, $innerJoinFk, $whereFk );
             $res .= "\n?>\nEOF\n";
             $res .= "chmod 777 {$filename}\n";
             $res .= "\n";
@@ -172,7 +194,7 @@ EOT;
         return str_replace( '$', '\$', $txt);
     }
 
-    private function createHelperClass($classname, $tablename, $cols, $idCols, $insertCols, $autoIncCols) {
+    private function createHelperClass($classname, $tablename, $cols, $idCols, $insertCols, $autoIncCols, $innerJoinFk, $whereFk) {
         $colNamesString = implode( ', ', $cols);
         $colNames = implode( "\n\t, ", $cols);
         $idColNames = implode(', ', $idCols);
@@ -180,11 +202,18 @@ EOT;
         $insertColNamesString = implode( ', ', $insertCols);
         $idargs = implode( ', ', array_map( function($x) { return "\$args['" . $x . "']"; }, $idCols));
         $where = implode( ' AND ', array_map( function($x) { return $x . " = ?"; }, $idCols));
+        $where = "{$tablename}." . implode( "=?\n\tAND {$tablename}.", $idCols) . '=?';
         $qs = substr(str_repeat('?,', count($insertCols)), 0, -1);
         $set = implode(', ', array_map(function($x) {
                     return $x . " = VALUES(" . $x . ")\n\t";
                 }, $insertCols));
         $autoInc = (count($autoIncCols)>0) ? 1 : 0;
+        $fullColNames = array_merge( $idCols, $cols);
+        $allColNames = "{$tablename}." . implode( "\n\t, {$tablename}.", $fullColNames);
+//        $fkJoin = {};
+//        if( 0 < count($fks)) {
+//            $whereFk .= implode( ' AND ', innerJoin = 
+//        }
         $txt = <<<EOT
 class {$classname} extends Base_dblayerHelper {
 
@@ -194,24 +223,54 @@ class {$classname} extends Base_dblayerHelper {
         \$this->idcol_ = '{$idColNames}';
         parent::__construct();
     }
-        
-    public function getAll( \$dbc) {
+
+    public function getSelectSql( ) {
         \$sql=<<<ESQL
-        SELECT {$idColNames}, {$colNames}
-        FROM {$tablename}
+    SELECT {$allColNames}
+    FROM {$tablename}
 ESQL;
+        return \$sql;
+     }
+
+    public function getFkSql( ) {
+        \$sql=<<<ESQL
+{$innerJoinFk}
+ESQL;
+        return \$sql;
+     }
+
+    public function getAll( \$dbc) {
+        \$sql=\$this->getSelectSql();
         \$rows = dbconn::exec(\$dbc, \$sql);
         return \$rows;
      }
 
     public function get( \$dbc, \$args) {
-        \$sql=<<<ESQL
-        SELECT {$idColNames}, {$colNames}
-        FROM {$tablename}
+        \$sql=\$this->getSelectSql();
+        \$sql .=<<<ESQL
         WHERE {$where}
 ESQL;
         \$rows = dbconn::exec(\$dbc, \$sql, [{$idargs}]);
-        return \$rows;
+        \$data = [];
+        foreach( \$rows as \$r) {
+            \$data[] = \$r;
+        }
+        return \$data;
+     }
+
+    public function getByFk( \$dbc, \$args) {
+        \$sql .=<<<ESQL
+    SELECT {$allColNames}
+    FROM {$tablename}
+        {$innerJoinFk}
+    WHERE {$whereFk}
+ESQL;
+        \$rows = dbconn::exec(\$dbc, \$sql, \$args);
+        \$data = [];
+        foreach( \$rows as \$r) {
+            \$data[] = \$r;
+        }
+        return \$data;
      }
 
     public function post( \$dbc, \$args, \$posted) {
@@ -271,6 +330,7 @@ class {$classname} extends Base_dblayer {
     }
 
 }
+
 EOT;
         return str_replace( '$', '\$', $txt);
     }

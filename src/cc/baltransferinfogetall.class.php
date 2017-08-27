@@ -12,4 +12,5 @@ class Cc_BaltransferinfoGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

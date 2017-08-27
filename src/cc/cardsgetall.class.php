@@ -12,4 +12,5 @@ class Cc_CardsGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

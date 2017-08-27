@@ -7,34 +7,66 @@ class Cc_CardsHelper extends Base_dblayerHelper {
         $this->idcol_ = 'cc_card_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT cc_card_id, cc_company_id
-	, card_name
-	, version
-	, annual_fee
-	, first_year_free
-	, recorded_on
-        FROM cc_cards
+    SELECT cc_cards.cc_card_id
+	, cc_cards.cc_company_id
+	, cc_cards.card_name
+	, cc_cards.version
+	, cc_cards.annual_fee
+	, cc_cards.first_year_free
+	, cc_cards.recorded_on
+    FROM cc_cards
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN cc_company ON cc_cards.cc_company_id=cc_company.cc_company_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT cc_card_id, cc_company_id
-	, card_name
-	, version
-	, annual_fee
-	, first_year_free
-	, recorded_on
-        FROM cc_cards
-        WHERE cc_card_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE cc_cards.cc_card_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['cc_card_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT cc_cards.cc_card_id
+	, cc_cards.cc_company_id
+	, cc_cards.card_name
+	, cc_cards.version
+	, cc_cards.annual_fee
+	, cc_cards.first_year_free
+	, cc_cards.recorded_on
+    FROM cc_cards
+        INNER JOIN cc_company ON cc_cards.cc_company_id=cc_company.cc_company_id
+    WHERE cc_company.cc_company_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -68,7 +100,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT cc_card_id FROM cc_cards WHERE cc_card_id = ?;";
+                $sql1 = "SELECT cc_card_id FROM cc_cards WHERE cc_cards.cc_card_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -79,7 +111,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM cc_cards WHERE cc_card_id = ?";
+        $sql = "DELETE FROM cc_cards WHERE cc_cards.cc_card_id=?";
         return dbconn::exec($dbc, $sql, [$args['cc_card_id']]);
     }
 }

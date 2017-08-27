@@ -3,51 +3,85 @@ class Client_AddressHelper extends Base_dblayerHelper {
 
     public function __construct() {
         $this->table_ = 'client_address';
-        $this->colNames_ = 'client_id, address_type, address_1, address_2, city, state, country, valid_from, valid_to, recorded_on';
+        $this->colNames_ = 'client_id, address_type, address_1, address_2, city, state, zip, country, valid_from, valid_to, recorded_on';
         $this->idcol_ = 'address_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT address_id, client_id
-	, address_type
-	, address_1
-	, address_2
-	, city
-	, state
-	, country
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_address
+    SELECT client_address.address_id
+	, client_address.client_id
+	, client_address.address_type
+	, client_address.address_1
+	, client_address.address_2
+	, client_address.city
+	, client_address.state
+	, client_address.zip
+	, client_address.country
+	, client_address.valid_from
+	, client_address.valid_to
+	, client_address.recorded_on
+    FROM client_address
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_person ON client_address.client_id=client_person.client_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT address_id, client_id
-	, address_type
-	, address_1
-	, address_2
-	, city
-	, state
-	, country
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_address
-        WHERE address_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE client_address.address_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['address_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT client_address.address_id
+	, client_address.client_id
+	, client_address.address_type
+	, client_address.address_1
+	, client_address.address_2
+	, client_address.city
+	, client_address.state
+	, client_address.zip
+	, client_address.country
+	, client_address.valid_from
+	, client_address.valid_to
+	, client_address.recorded_on
+    FROM client_address
+        INNER JOIN client_person ON client_address.client_id=client_person.client_id
+    WHERE client_person.client_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
         $values = [];
-        $insertCols = explode(',', 'client_id, address_type, address_1, address_2, city, state, country, valid_from, valid_to');
+        $insertCols = explode(',', 'client_id, address_type, address_1, address_2, city, state, zip, country, valid_from, valid_to');
         foreach( $insertCols as $col) {
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
@@ -59,16 +93,18 @@ ESQL;
 	, address_2
 	, city
 	, state
+	, zip
 	, country
 	, valid_from
 	, valid_to )
-    VALUES(?,?,?,?,?,?,?,?,?)
+    VALUES(?,?,?,?,?,?,?,?,?,?)
     ON DUPLICATE KEY UPDATE client_id = VALUES(client_id)
 	, address_type = VALUES(address_type)
 	, address_1 = VALUES(address_1)
 	, address_2 = VALUES(address_2)
 	, city = VALUES(city)
 	, state = VALUES(state)
+	, zip = VALUES(zip)
 	, country = VALUES(country)
 	, valid_from = VALUES(valid_from)
 	, valid_to = VALUES(valid_to)
@@ -84,7 +120,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT address_id FROM client_address WHERE address_id = ?;";
+                $sql1 = "SELECT address_id FROM client_address WHERE client_address.address_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -95,7 +131,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM client_address WHERE address_id = ?";
+        $sql = "DELETE FROM client_address WHERE client_address.address_id=?";
         return dbconn::exec($dbc, $sql, [$args['address_id']]);
     }
 }

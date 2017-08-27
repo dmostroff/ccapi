@@ -7,40 +7,72 @@ class Adm_UsersHelper extends Base_dblayerHelper {
         $this->idcol_ = 'user_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT user_id, login
-	, pwd
-	, user_name
-	, email
-	, phone
-	, phone_2
-	, phone_cell
-	, phone_fax
-	, recorded_on
-        FROM adm_users
+    SELECT adm_users.user_id
+	, adm_users.login
+	, adm_users.pwd
+	, adm_users.user_name
+	, adm_users.email
+	, adm_users.phone
+	, adm_users.phone_2
+	, adm_users.phone_cell
+	, adm_users.phone_fax
+	, adm_users.recorded_on
+    FROM adm_users
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT user_id, login
-	, pwd
-	, user_name
-	, email
-	, phone
-	, phone_2
-	, phone_cell
-	, phone_fax
-	, recorded_on
-        FROM adm_users
-        WHERE user_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE adm_users.user_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['user_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT adm_users.user_id
+	, adm_users.login
+	, adm_users.pwd
+	, adm_users.user_name
+	, adm_users.email
+	, adm_users.phone
+	, adm_users.phone_2
+	, adm_users.phone_cell
+	, adm_users.phone_fax
+	, adm_users.recorded_on
+    FROM adm_users
+        
+    WHERE 
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -80,7 +112,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT user_id FROM adm_users WHERE user_id = ?;";
+                $sql1 = "SELECT user_id FROM adm_users WHERE adm_users.user_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -91,7 +123,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM adm_users WHERE user_id = ?";
+        $sql = "DELETE FROM adm_users WHERE adm_users.user_id=?";
         return dbconn::exec($dbc, $sql, [$args['user_id']]);
     }
 }

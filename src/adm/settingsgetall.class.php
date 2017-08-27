@@ -12,4 +12,5 @@ class Adm_SettingsGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

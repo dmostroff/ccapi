@@ -12,4 +12,5 @@ class Client_FinancialsGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

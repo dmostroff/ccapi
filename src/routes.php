@@ -112,9 +112,11 @@ $app->post('/client/financials', new FileLoad($app, '', 'Client_FinancialsPost')
 $app->delete('/client/financials', new FileLoad($app, '', 'Client_FinancialsDelete'))->setName('ClientFinancialsDelete');
 
 $app->get('/client/person', new FileLoad($app, '', 'Client_PersonGetAll'))->setName('ClientPersonGetAll');
-$app->get('/client/person/{client_id}', new FileLoad($app, '', 'Client_PersonGet'))->setName('ClientPersonGet');
+$app->get('/client/person/{client_id:\d+}', new FileLoad($app, '', 'Client_PersonGet'))->setName('ClientPersonGet');
 $app->post('/client/person', new FileLoad($app, '', 'Client_PersonPost'))->setName('ClientPersonPost');
 $app->delete('/client/person', new FileLoad($app, '', 'Client_PersonDelete'))->setName('ClientPersonDelete');
+
+$app->get('/client/person/detail/{client_id:\d+}', new FileLoad($app, '', 'Client_PersonGetDetail'))->setName('ClientPersonGetDetail');
 
 /* ------------------------------------------------------------
  * Meta

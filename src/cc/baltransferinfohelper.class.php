@@ -7,34 +7,66 @@ class Cc_BaltransferinfoHelper extends Base_dblayerHelper {
         $this->idcol_ = 'bal_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT bal_id, client_id
-	, clicc_id
-	, due_date
-	, total
-	, credit_line
-	, recorded_on
-        FROM cc_baltransferinfo
+    SELECT cc_baltransferinfo.bal_id
+	, cc_baltransferinfo.client_id
+	, cc_baltransferinfo.clicc_id
+	, cc_baltransferinfo.due_date
+	, cc_baltransferinfo.total
+	, cc_baltransferinfo.credit_line
+	, cc_baltransferinfo.recorded_on
+    FROM cc_baltransferinfo
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_person ON cc_baltransferinfo.client_id=client_person.client_idINNER JOIN client_cc ON cc_baltransferinfo.clicc_id=client_cc.clicc_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT bal_id, client_id
-	, clicc_id
-	, due_date
-	, total
-	, credit_line
-	, recorded_on
-        FROM cc_baltransferinfo
-        WHERE bal_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE cc_baltransferinfo.bal_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['bal_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT cc_baltransferinfo.bal_id
+	, cc_baltransferinfo.client_id
+	, cc_baltransferinfo.clicc_id
+	, cc_baltransferinfo.due_date
+	, cc_baltransferinfo.total
+	, cc_baltransferinfo.credit_line
+	, cc_baltransferinfo.recorded_on
+    FROM cc_baltransferinfo
+        INNER JOIN client_person ON cc_baltransferinfo.client_id=client_person.client_idINNER JOIN client_cc ON cc_baltransferinfo.clicc_id=client_cc.clicc_id
+    WHERE client_cc.clicc_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -68,7 +100,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT bal_id FROM cc_baltransferinfo WHERE bal_id = ?;";
+                $sql1 = "SELECT bal_id FROM cc_baltransferinfo WHERE cc_baltransferinfo.bal_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -79,7 +111,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM cc_baltransferinfo WHERE bal_id = ?";
+        $sql = "DELETE FROM cc_baltransferinfo WHERE cc_baltransferinfo.bal_id=?";
         return dbconn::exec($dbc, $sql, [$args['bal_id']]);
     }
 }

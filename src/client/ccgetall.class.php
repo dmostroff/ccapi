@@ -12,4 +12,5 @@ class Client_CcGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

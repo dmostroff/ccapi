@@ -7,40 +7,72 @@ class Client_BusinessHelper extends Base_dblayerHelper {
         $this->idcol_ = 'pbiz_id';
         parent::__construct();
     }
-        
-    public function getAll( $dbc) {
+
+    public function getSelectSql( ) {
         $sql=<<<ESQL
-        SELECT pbiz_id, client_id
-	, business_name
-	, address_id
-	, revenue
-	, num_of_years
-	, num_of_employees
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_business
+    SELECT client_business.pbiz_id
+	, client_business.client_id
+	, client_business.business_name
+	, client_business.address_id
+	, client_business.revenue
+	, client_business.num_of_years
+	, client_business.num_of_employees
+	, client_business.valid_from
+	, client_business.valid_to
+	, client_business.recorded_on
+    FROM client_business
 ESQL;
+        return $sql;
+     }
+
+    public function getFkSql( ) {
+        $sql=<<<ESQL
+INNER JOIN client_person ON client_business.client_id=client_person.client_id
+ESQL;
+        return $sql;
+     }
+
+    public function getAll( $dbc) {
+        $sql=$this->getSelectSql();
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
 
     public function get( $dbc, $args) {
-        $sql=<<<ESQL
-        SELECT pbiz_id, client_id
-	, business_name
-	, address_id
-	, revenue
-	, num_of_years
-	, num_of_employees
-	, valid_from
-	, valid_to
-	, recorded_on
-        FROM client_business
-        WHERE pbiz_id = ?
+        $sql=$this->getSelectSql();
+        $sql .=<<<ESQL
+        WHERE client_business.pbiz_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['pbiz_id']]);
-        return $rows;
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
+     }
+
+    public function getByFk( $dbc, $args) {
+        $sql .=<<<ESQL
+    SELECT client_business.pbiz_id
+	, client_business.client_id
+	, client_business.business_name
+	, client_business.address_id
+	, client_business.revenue
+	, client_business.num_of_years
+	, client_business.num_of_employees
+	, client_business.valid_from
+	, client_business.valid_to
+	, client_business.recorded_on
+    FROM client_business
+        INNER JOIN client_person ON client_business.client_id=client_person.client_id
+    WHERE client_person.client_id=?
+ESQL;
+        $rows = dbconn::exec($dbc, $sql, $args);
+        $data = [];
+        foreach( $rows as $r) {
+            $data[] = $r;
+        }
+        return $data;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -80,7 +112,7 @@ ESQL;
                 $rows = dbconn::exec($dbc, $sql1);
                 $id = (isset($rows[0])) ? $rows[0]['id'] : null;
             } else {
-                $sql1 = "SELECT pbiz_id FROM client_business WHERE pbiz_id = ?;";
+                $sql1 = "SELECT pbiz_id FROM client_business WHERE client_business.pbiz_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
             }
@@ -91,7 +123,7 @@ ESQL;
     }
 
     public function delete($dbc, $ids) {
-        $sql = "DELETE FROM client_business WHERE pbiz_id = ?";
+        $sql = "DELETE FROM client_business WHERE client_business.pbiz_id=?";
         return dbconn::exec($dbc, $sql, [$args['pbiz_id']]);
     }
 }

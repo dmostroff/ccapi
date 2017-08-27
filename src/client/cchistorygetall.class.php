@@ -12,4 +12,5 @@ class Client_CchistoryGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

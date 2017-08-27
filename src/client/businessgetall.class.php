@@ -12,4 +12,5 @@ class Client_BusinessGetAll extends Base_dblayer {
     }
 
 }
+
 ?>

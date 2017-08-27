@@ -12,4 +12,5 @@ class Cc_TransactionGetAll extends Base_dblayer {
     }
 
 }
+
 ?>
