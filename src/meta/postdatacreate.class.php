@@ -1,13 +1,13 @@
 <?php
 
-class Meta_TablesCurlCreate extends Base_dblayer {
+class Meta_PostDataCreate extends Base_dblayer {
 
     public function invoke($request, $response, $args) {
         $dbc = $this->connect();
         $tablename = $args['table'];
         $baseDir = '/home/DANO/projects/ccapi';
         $scriptsDir = $baseDir . '/scripts';
-        $curlFile = "{$scriptsDir}/metaTablesCurlScript.sh";
+        $curlFile = "{$scriptsDir}/metaPostDataCreate.sh";
         $res = "########### BEGIN " . date("Y-m-d h:i:s") . " ###############\n";
         // $baseDir = '/var/www/ccapi';
         try {

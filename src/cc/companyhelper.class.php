@@ -127,14 +127,13 @@ ESQL;
 //            error_log($sql);
 //            error_log(print_r($values, 1));
             dbconn::exec($dbc, $sql, $values);
-            if(1) {
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-            } else {
+            $sql1 = "SELECT last_insert_id() as id;";
+            $rows = dbconn::exec($dbc, $sql1);
+            $id = (isset($rows[0])) ? $rows[0]['id'] : null;
+            if( $id == 0) {
                 $sql1 = "SELECT cc_company_id FROM cc_company WHERE cc_company.cc_company_id=?;";
-                $rows = dbconn::exec($dbc, $sql1, [$args]);
-                $id = (isset($rows[0])) ? $rows[0] : null;
+                $rows = dbconn::exec($dbc, $sql1, [$posted['cc_company_id']]);
+                $id = (isset($rows[0])) ? $rows[0]['cc_company_id'] : null;
             }
         } catch (Exception $ex) {
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
