@@ -1,0 +1,1 @@
+git status | sed 's/modified:/git add/g;s/\t/ /g' | bash

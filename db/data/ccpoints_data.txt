@@ -1,0 +1,87 @@
+{
+	"client_id" : 1,
+	"name" : "George Washington",
+	"mispar" : "5114456712344321",
+	"exp_date" : "0219",
+	"mispar_v" : "567",
+	"cc_login" : "george",
+	"cc_password" : "martha",
+	"cc_company_id" : "",
+	"cc_status" : "",
+	"annual_fee" : 0,
+	"credit_limit" : 500.00,
+	"addtional_card" : ""
+}
+
+
+
+INSERT INTO client_cc ( client_id
+	, name
+	, mispar
+	, exp_date
+	, mispar_v
+	, cc_login
+	, cc_password
+	, cc_company_id
+	, cc_status
+	, annual_fee
+	, credit_limit
+	, addtional_card )
+VALUES(1,
+    'Georege Washington',
+	'5114456712344321',
+	'2019-02-01',
+	'567',
+	'george',
+	'martha',
+	1,
+	'',
+	0,
+	500.00,
+	''
+) ON DUPLICATE KEY UPDATE client_id = VALUES(client_id)
+	, name = VALUES(name)
+	, mispar = VALUES(mispar)
+	, exp_date = VALUES(exp_date)
+	, mispar_v = VALUES(mispar_v)
+	, cc_login = VALUES(cc_login)
+	, cc_password = VALUES(cc_password)
+	, cc_company_id = VALUES(cc_company_id)
+	, cc_status = VALUES(cc_status)
+	, annual_fee = VALUES(annual_fee)
+	, credit_limit = VALUES(credit_limit)
+	, addtional_card = VALUES(addtional_card)
+    ;
+    
+adm_settings, {"prefix":"","keyname":"","keyvalue":""}
+adm_tags, {"prefix":"","tag":"","description":""}
+adm_users, {"user_id":"","login":"","pwd":"","user_name":"","email":"","phone":"","phone_2":"","phone_cell":"","phone_fax":"","recorded_on":""}
+cc_action, {"ccaction_id":"","clicc_id":"","ccaction":"","action_type":"","action_status":"","due_date":"","details":"","recorded_on":""}
+cc_baltransferinfo, {"bal_id":"","client_id":"","clicc_id":"","due_date":"","total":"","credit_line":"","recorded_on":""}
+cc_cards, {"cc_card_id":"","cc_company_id":"","card_name":"","version":"","annual_fee":"","first_year_free":"","recorded_on":""}
+cc_company, {"cc_company_id":"","cc_name":"","url":"","contact":"","address_1":"","address_2":"","city":"","state":"","country":"","phone":"","phone_2":"","phone_cell":"","phone_fax":"","recorded_on":""}
+cc_transaction, {"cctrans_id":"","clicc_id":"","transaction_date":"","transaction_type":"","transaction_status":"","cedit":"","debit":"","recorded_on":""}
+client_address, {"address_id":"","client_id":"","address_type":"","address_1":"","address_2":"","city":"","state":"","country":"","valid_from":"","valid_to":"","recorded_on":""}
+client_business, {"pbiz_id":"","client_id":"","business_name":"","address_id":"","revenue":"","num_of_years":"","num_of_employees":"","valid_from":"","valid_to":"","recorded_on":""}
+client_cc, {"clicc_id":"","client_id":"","name":"","mispar":"","exp_date":"","mispar_v":"","cc_login":"","cc_password":"","cc_company_id":"","cc_status":"","annual_fee":"","credit_limit":"","addtional_card":"","recorded_on":""}
+client_cchistory, {"cchist_id":"","clicc_id":"","ccevent":"","ccevent_amt":"","details":"","recorded_on":""}
+client_financials, {"financial_id":"","client_id":"","annual_income":"","credit_line":"","valid_from":"","valid_to":"","recorded_on":""}
+client_person, {"client_id":"","last_name":"","first_name":"","middle_name":"","dob":"","gender":"","ssn":"","mmn":"","email":"","pwd":"","phone":"","phone_2":"","phone_cell":"","phone_fax":"","phone_official":"","recorded_on":""}
+
+
+{
+	"cc_name" : "American Express",
+	"url" : "americanexpress.com",
+	"contact" : "",
+	"address_1" : "P.O. Box 650448"
+,  75265-0448",
+	"address_2" : "",
+	"city" : "Dallas",
+	"state" : "TX",
+	"country" : "",
+	"phone" : "",
+	"phone_2" : "",
+	"phone_cell" : "",
+	"phone_fax" : "",
+	"recorded_on" : ""
+}
