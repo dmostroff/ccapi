@@ -286,7 +286,7 @@ CREATE USER IF NOT EXISTS 'dano'@'localhost'
     PASSWORD EXPIRE NEVER
     ;
 
-GRANT ALL ON `ccpoints`.* TO 'dano'@'localhost'
+GRANT ALL ON `ccpoints`.* TO 'dano'@'%'
 ;
 
 

@@ -1,0 +1,42 @@
+    "res": {
+        "rc": 0,
+        "msg": "OK"
+    },
+    "data": [
+        {
+            "user_id": "1",
+            "login": "dano",
+            "pwd": "*CEBA45502527BA34FA97345E2D9884DBB66775F3",
+            "user_name": "Daniel Ostroff",
+            "email": "dostroff@gmail.com",
+            "phone": "025336219",
+            "phone_2": null,
+            "phone_cell": "0548463872",
+            "phone_fax": "025790204",
+            "recorded_on": "2017-09-09 07:58:13"
+        },
+        {
+            "user_id": "2",
+            "login": "rto",
+            "pwd": "*F583269A6423222DA38948952D5ACEB0E34A077E",
+            "user_name": "Raphael Ostroff",
+            "email": "ostroff2015@gmail.com",
+            "phone": "7326643993",
+            "phone_2": null,
+            "phone_cell": "",
+            "phone_fax": null,
+            "recorded_on": "2017-09-09 07:58:13"
+        },
+        {
+            "user_id": "3",
+            "login": "mhetz",
+            "pwd": "*00A51F3F48415C7D4E8908980D443C29C69B60C9",
+            "user_name": "Morris Hertz",
+            "email": "morrishertz@gmail.com",
+            "phone": "025790204",
+            "phone_2": null,
+            "phone_cell": "0548461212",
+            "phone_fax": null,
+            "recorded_on": "2017-09-09 08:21:46"
+        }
+    ]

@@ -44,35 +44,16 @@ ESQL;
         WHERE adm_users.user_id=?
 ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['user_id']]);
-        $data = [];
+        $data = null;
         foreach( $rows as $r) {
-            $data[] = $r;
+            $data = $r;
+            break;
         }
         return $data;
      }
 
     public function getByFk( $dbc, $args) {
-        $sql .=<<<ESQL
-    SELECT adm_users.user_id
-	, adm_users.login
-	, adm_users.pwd
-	, adm_users.user_name
-	, adm_users.email
-	, adm_users.phone
-	, adm_users.phone_2
-	, adm_users.phone_cell
-	, adm_users.phone_fax
-	, adm_users.recorded_on
-    FROM adm_users
-        
-    WHERE 
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, $args);
-        $data = [];
-        foreach( $rows as $r) {
-            $data[] = $r;
-        }
-        return $data;
+        return null;
      }
 
     public function post( $dbc, $args, $posted) {
@@ -82,6 +63,7 @@ ESQL;
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
         }
+        $values['pwd'] = password_hash($values['pwd'], PASSWORD_DEFAULT );
         $sql = <<<ESQL
     INSERT INTO adm_users ( login
 	, pwd
@@ -107,19 +89,14 @@ ESQL;
 //            error_log($sql);
 //            error_log(print_r($values, 1));
             dbconn::exec($dbc, $sql, $values);
-            if(1) {
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-            } else {
-                $sql1 = "SELECT user_id FROM adm_users WHERE adm_users.user_id=?;";
-                $rows = dbconn::exec($dbc, $sql1, [$args]);
-                $id = (isset($rows[0])) ? $rows[0] : null;
-            }
+            $sql1 = "SELECT last_insert_id() as id;";
+            $rows = dbconn::exec($dbc, $sql1);
+            $id = (isset($rows[0])) ? $rows[0]['id'] : null;
+            $rows = $this->get( $dbc, ['user_id'=>$id]);
         } catch (Exception $ex) {
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
-        return ['id' => $id] ;
+        return (isset($rows[0])) ? $rows[0] : null;
     }
 
     public function delete($dbc, $ids) {

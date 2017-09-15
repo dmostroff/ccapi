@@ -53,7 +53,9 @@ $app->delete('/admin/tags', new FileLoad( $app, "", 'Adm_TagDelete'))->setName('
 $app->get('/admin/users', new FileLoad($app, '', 'Adm_UsersGetAll'))->setName('AdmUsersGetAll');
 $app->get('/admin/users/{user_id}', new FileLoad($app, '', 'Adm_UsersGet'))->setName('AdmUsersGet');
 $app->post('/admin/users', new FileLoad($app, '', 'Adm_UsersPost'))->setName('AdmUsersPost');
+$app->post('/admin/users/login', new FileLoad($app, '', 'Adm_UsersLogin'))->setName('AdmUsersLogin');
 $app->delete('/admin/users', new FileLoad($app, '', 'Adm_UsersDelete'))->setName('AdmUsersDelete');
+
 
 /* ------------------------------------------------------------
  * Cc
@@ -124,7 +126,9 @@ $app->get('/client/person/detail/{client_id:\d+}', new FileLoad($app, '', 'Clien
  ------------------------------------------------------------*/
 $app->get( '/meta/tablescurl', new FileLoad( $app, "", 'Meta_TablesCurlCreate'))->setName('MetaTablesCurlCreate');
 $app->get( '/meta/{table}', new FileLoad( $app, "", 'Meta_ClassnameCreate'))->setName('metaClassnameCreate');
-
+$app->get( '/meta/angular/class/{table}', new FileLoad( $app, "", 'Meta_AngularCreateClass'))->setName('metaAngularCreateClass');
+$app->get( '/meta/angular/form/{table}/{component}/{classname}', new FileLoad( $app, "", 'Meta_AngularCreateForm'))->setName('metaAngularCreateForm');
+$app->get( '/meta/angular/service/{table}/{classname}', new FileLoad( $app, "", 'Meta_AngularServiceCreate'))->setName('metaAngularServiceCreate');
 
 $app->get('/hello/{name}', function ($request, $response) {
     $name = $request->getAttribute('name');
