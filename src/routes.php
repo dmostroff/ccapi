@@ -81,6 +81,8 @@ $app->get('/cc/company/detail/{cc_company_id}', new FileLoad($app, '', 'Cc_Compa
 $app->post('/cc/company', new FileLoad($app, '', 'Cc_CompanyPost'))->setName('CcCompanyPost');
 $app->delete('/cc/company', new FileLoad($app, '', 'Cc_CompanyDelete'))->setName('CcCompanyDelete');
 
+$app->get('/cc/company/cards/{cc_company_id}', new FileLoad($app, '', 'Cc_CompanyCards'))->setName('CcCompanyCards');
+
 $app->get('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionGetAll'))->setName('CcTransactionGetAll');
 $app->get('/cc/transaction/{cctrans_id}', new FileLoad($app, '', 'Cc_TransactionGet'))->setName('CcTransactionGet');
 $app->post('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionPost'))->setName('CcTransactionPost');

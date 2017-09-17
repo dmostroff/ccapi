@@ -1,14 +1,16 @@
---DROP FUNCTION f_angular_form_create;
+-- DROP FUNCTION f_angular_form_create;
 DELIMITER $$
-CREATE FUNCTION f_angular_form_create( a_tablename text, component text, className text) RETURNS text
+CREATE FUNCTION f_angular_form_create( a_tablename text, className text) RETURNS text
   DETERMINISTIC
 BEGIN
   DECLARE mytext text;
   DECLARE mysnippet text;
   DECLARE mysnippet1 text;
   DECLARE ucTable text;
+  DECLARE component text;
   DECLARE mycolumn text;
   DECLARE mydatatype text;
+  DECLARE myTitle text;
   DECLARE objName text;
   DECLARE myFormName text;
   DECLARE myServiceName text;
@@ -24,10 +26,13 @@ DECLARE cursor_i CURSOR FOR
     ;
 DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-SET ucTable = CONCAT(UCASE(LEFT(LOWER(a_tablename), 1)), SUBSTRING(LOWER(a_tablename), 2));
-SET objName = CONCAT(LOWER(LEFT(className, 1)), SUBSTRING(className, 2));
-SET myFormName = CONCAT( objName,'Form');
-SET myServiceName = CONCAT( objName, 'Service');
+SET component = concat(className, 'Component');
+SET ucTable = concat(UCASE(LEFT(LOWER(a_tablename), 1)), SUBSTRING(LOWER(a_tablename), 2));
+SET objName = concat(LOWER(LEFT(className, 1)), SUBSTRING(className, 2));
+SET myFormName = concat( objName,'Form');
+SET myServiceName = concat( objName, 'Service');
+SET myTitle = SUBSTRING_INDEX(className, '_', -1);
+SET myTitle = concat(UCASE(LEFT(myTitle), 1)), SUBSTRING(LOWER(myTitle), 2));
 
 SET mysnippet = '';
 
@@ -39,13 +44,12 @@ lp1: LOOP
 		LEAVE lp1;
 	END IF;
 	SET formControlText = CONCAT(
-						'\n\t<div fxLayout="row">',
-						'\n\t\t<md-form-field class="form-group" fxFlex fxFlexAlign="end center">',
+    
+						'\n<md-form-field class="form-group" fxFlex fxFlexAlign="end center">',
 						'\n\t\t\t<input mdInput type="text" formControlName="', mycolumn, '" placeholder="', mycolumn, '">',
 						'\n\t\t\t<md-error *ngIf="', myFormName, '.hasError(\'required\')">', mycolumn, ' is <strong>required</strong>',
 						'\n\t\t\t</md-error>',
 						'\n\t\t</md-form-field>',
-						'\n\t</div>');
 
     SET mysnippet = CONCAT( mysnippet, REPLACE( formControlText, 'COULUMN_NAME', mycolumn));
 END LOOP;
@@ -66,8 +70,8 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 --	ORDER BY ORDINAL_POSITION
 --	;
 */
-	SET mytext := '';
-	SET mytext := concat(mytext, '<form [formGroup]="', myFormName, '" (ngSubmit)="onSubmit()" validate fxLayout="column" fxLayoutAlign="center center" novalidate>');
+	SET mytext := concat('<h2>', myTitle, '</h2>');
+	SET mytext := concat(mytext, '<form [formGroup]="', myFormName, '" (ngSubmit)="onSubmit()" class="form-class" fxLayout="column" fxLayoutAlign="center center" novalidate>');
     SET mytext := concat(mytext, '\n<div fxFlex class="form-group">');
 	SET mytext := concat(mytext, '\n\t', mysnippet);
     SET mytext := concat(mytext, '\n\t</div>');
@@ -87,7 +91,7 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 	SET mytext := concat(mytext, '\n');
 	SET mytext := concat(mytext, '\n@Component({');
 	SET mytext := concat(mytext, '\n  selector: app-', a_tablename, ''',');
-	SET mytext := concat(mytext, '\n  templateUrl: ./', a_tablename, '.component.html'',''');
+	SET mytext := concat(mytext, '\n  templateUrl: ''./', a_tablename, '.component.html'',''');
 	SET mytext := concat(mytext, '\n  styleUrls: [''./', a_tablename, '.component.css''],''');
 	SET mytext := concat(mytext, '\n}');
 	SET mytext := concat(mytext, '\nexport class ', component, 'Component implements OnChanges {');

@@ -51,7 +51,8 @@ ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['cc_company_id']]);
         $data = [];
         foreach( $rows as $r) {
-            $data[] = $r;
+            $data = $r;
+            break;
         }
         return $data;
      }
