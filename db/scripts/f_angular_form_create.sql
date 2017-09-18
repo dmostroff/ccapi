@@ -1,4 +1,4 @@
--- DROP FUNCTION f_angular_form_create;
+DROP FUNCTION f_angular_form_create;
 DELIMITER $$
 CREATE FUNCTION f_angular_form_create( a_tablename text, className text) RETURNS text
   DETERMINISTIC
@@ -32,7 +32,7 @@ SET objName = concat(LOWER(LEFT(className, 1)), SUBSTRING(className, 2));
 SET myFormName = concat( objName,'Form');
 SET myServiceName = concat( objName, 'Service');
 SET myTitle = SUBSTRING_INDEX(className, '_', -1);
-SET myTitle = concat(UCASE(LEFT(myTitle), 1)), SUBSTRING(LOWER(myTitle), 2));
+SET myTitle = concat(UCASE(LEFT(myTitle, 1)), SUBSTRING(LOWER(myTitle), 2));
 
 SET mysnippet = '';
 
@@ -44,12 +44,14 @@ lp1: LOOP
 		LEAVE lp1;
 	END IF;
 	SET formControlText = CONCAT(
-    
-						'\n<md-form-field class="form-group" fxFlex fxFlexAlign="end center">',
-						'\n\t\t\t<input mdInput type="text" formControlName="', mycolumn, '" placeholder="', mycolumn, '">',
-						'\n\t\t\t<md-error *ngIf="', myFormName, '.hasError(\'required\')">', mycolumn, ' is <strong>required</strong>',
-						'\n\t\t\t</md-error>',
-						'\n\t\t</md-form-field>',
+		'\n\t<div fxLayout="row" fxLayoutGap="15px">'
+		'\n\t\t<md-form-field class="form-group" fxFlex fxFlexAlign="start center">',
+		'\n\t\t\t<input mdInput type="text" formControlName="', mycolumn, '" placeholder="', mycolumn, '">',
+		'\n\t\t\t<md-error *ngIf="', myFormName, '.hasError(\'required\')">', mycolumn, ' is <strong>required</strong>',
+		'\n\t\t\t</md-error>',
+		'\n\t\t</md-form-field>'
+        '\n\t</div>'
+		);
 
     SET mysnippet = CONCAT( mysnippet, REPLACE( formControlText, 'COULUMN_NAME', mycolumn));
 END LOOP;
@@ -70,24 +72,32 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 --	ORDER BY ORDINAL_POSITION
 --	;
 */
-	SET mytext := concat('<h2>', myTitle, '</h2>');
+	SET mytext := '';
+	SET mytext := concat(mytext, '<div *ngIf="', myServiceName, '.', objName, '.name" fxLayout="row">');
+	SET mytext := concat(mytext, '\n\t<h2 class="md-title" fxFlex="50%">{{', myServiceName, '.', objName, '.name}}</h2>');
+	SET mytext := concat(mytext, '\n\t<div fxFlex></div>');
+	SET mytext := concat(mytext, '\n\t<div fxFlex="5%"  fxFlexAlign="end" class="id">{{', myServiceName, '.', objName, '.id}}</div>');
+	SET mytext := concat(mytext, '\n\t<div fxFlex="16%" fxFlexAlign="end" class="recorded-on">{{', myServiceName, '.', objName, '.recorded_on}}</div>');
+	SET mytext := concat(mytext, '\n</div>');
+	SET mytext := concat(mytext, '\n');
 	SET mytext := concat(mytext, '<form [formGroup]="', myFormName, '" (ngSubmit)="onSubmit()" class="form-class" fxLayout="column" fxLayoutAlign="center center" novalidate>');
-    SET mytext := concat(mytext, '\n<div fxFlex class="form-group">');
 	SET mytext := concat(mytext, '\n\t', mysnippet);
-    SET mytext := concat(mytext, '\n\t</div>');
+  	SET mytext := concat(mytext, '\n\t<div fxLayout="row" fxLayoutAlign="end end">');
+	SET mytext := concat(mytext, '\n\t\t<button fxFlex="18%" md-raised-button type="submit" (click)="onSubmit()" class="submitButton">Submit</button>');
+  	SET mytext := concat(mytext, '\n\t</div>');
 	SET mytext := concat(mytext, '\n</form>');
 	SET mytext := concat(mytext, '\n\n\t  <button md-raised-button type="submit" (click)="onSubmit()" class="loginButton">Login</button>');
 	SET mytext := concat(mytext, '\n\t\t<p>Form value: {{ '', ', myFormName, '.value | json }}</p>);');
 	SET mytext := concat(mytext, '\n');
 
-	SET mytext := concat(mytext, '\nimport { Component, Input, OnChanges }       from ''@angular/core'';');
-	SET mytext := concat(mytext, '\nimport { FormArray, FormBuilder} from ''@angular/forms'';');
-	SET mytext := concat(mytext, '\nimport {FormGroup, FormControl, Validators} from ''@angular/forms'';');
-	SET mytext := concat(mytext, '\nimport { ', objName, ' } from ''./../', a_tablename, ''';');
-	SET mytext := concat(mytext, '\nimport { ', myServiceName, ' } from ''./../', a_tablename, '.service'';');
+	SET mytext := concat(mytext, '\nimport { Component, Input, OnChanges } from "@angular/core";');
+	SET mytext := concat(mytext, '\nimport { FormArray, FormBuilder} from "@angular/forms";');
+	SET mytext := concat(mytext, '\nimport {FormGroup, FormControl, Validators} from "@angular/forms";');
+	SET mytext := concat(mytext, '\nimport { Routes, RouterModule, Router, ActivatedRoute } from "@angular/router";');
+    SET mytext := concat(mytext, '\n');
+	SET mytext := concat(mytext, '\nimport { ', objName, ' } from ''./', a_tablename, ''';');
+	SET mytext := concat(mytext, '\nimport { ', myServiceName, ' } from ''./', a_tablename, '.service'';');
 	SET mytext := concat(mytext, '\n');
-	SET mytext := concat(mytext, '\n');
-	SET mytext := concat(mytext, '\nconst PWD_REGEX = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]{8,}$/;');
 	SET mytext := concat(mytext, '\n');
 	SET mytext := concat(mytext, '\n@Component({');
 	SET mytext := concat(mytext, '\n  selector: app-', a_tablename, ''',');
@@ -103,8 +113,9 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 	SET mytext := concat(mytext, '\nconstructor(');
 	SET mytext := concat(mytext, '\n\tprivate fb: FormBuilder');
 	SET mytext := concat(mytext, '\n\t, private ', myServiceName, ': ', UCASE(LEFT(myServiceName, 1)), SUBSTRING(myServiceName, 2));
+	SET mytext := concat(mytext, '\n\t, private route: ActivatedRoute');
 	SET mytext := concat(mytext, '\n\t) {');
-	SET mytext := concat(mytext, '\n\tthis.', myFormName, 'Control = new FormControl('', [Validators.required, Validators.pattern(PWD_REGEX)]);');
+	SET mytext := concat(mytext, '\n\tthis.', myFormName, 'Control = new FormControl('', [Validators.required]);');
 	SET mytext := concat(mytext, '\n\tthis.', objName, ' = ', myServiceName, '.', objName, ';');
 	SET mytext := concat(mytext, '\n\tthis.createForm();');
 	SET mytext := concat(mytext, '\n\t}');
@@ -113,13 +124,7 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 	SET mytext := concat(mytext, '\n\tthis.', myFormName, ' = this.fb.group({');
 	SET mytext := concat(mytext, '\n\t\t');
 	  
-	SELECT GROUP_CONCAT( concat(COLUMN_NAME, ': '
-	, case 
-		when lower(DATA_TYPE) in ('varchar', 'char', 'text') then '''''' 
-		when lower(DATA_TYPE) in ('date', 'datetime', 'timestamp') then '''''' 
-		when lower(DATA_TYPE) in ('bool','boolean') then 'false' 
-        else '0'
-    end) SEPARATOR '\n\t\t, ')
+	SELECT GROUP_CONCAT( concat(COLUMN_NAME, ': this.', objName, '.', COLUMN_NAME) SEPARATOR '\n\t\t, ')
 INTO mysnippet
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_NAME = a_tablename AND COLUMN_NAME != 'recorded_on'
@@ -136,11 +141,28 @@ ORDER BY ORDINAL_POSITION
 	SET mytext := concat(mytext, '\n\t});');
 	SET mytext := concat(mytext, '\n}');
 	SET mytext := concat(mytext, '\n');
-	SET mytext := concat(mytext, '\nonSubmit() {');
-	SET mytext := concat(mytext, '\nconsole.log(this.', myFormName, '.value);');
-	SET mytext := concat(mytext, '\nthis.', myServiceName, '.post(, this.', myFormName, '.value);');
-	SET mytext := concat(mytext, '\nthis.', myServiceName, '.loadDone.subscribe(isDone => { if(isDone) {  this.', objName , ' = this.', myServiceName, '.', objName, '; console.log(this.', objName, '); }});');
-	SET mytext := concat(mytext, '\n}');
+	SET mytext := concat(mytext, '\n\tsetValues() {');
+	SET mytext := concat(mytext, '\n\t\tthis.', myFormName, '.setValue({');
+	SELECT GROUP_CONCAT( concat(COLUMN_NAME, ': this.', myServiceName, '.', objName, '.', COLUMN_NAME) SEPARATOR '\n\t\t, ')
+INTO mysnippet
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = a_tablename AND COLUMN_NAME != 'recorded_on'
+ORDER BY ORDINAL_POSITION 
+;
+	SET mytext := concat(mytext, mysnippet);
+	SET mytext := concat(mytext, '\n\t});');    
+	SET mytext := concat(mytext, '\n');    
+	SET mytext := concat(mytext, '\n\tonLoad( id) {');
+   	SET mytext := concat(mytext, '\n\t\tthis.', myServiceName, '.get', classname, '(id);');
+   	SET mytext := concat(mytext, '\n\t\tthis.', myServiceName, '.bDone.subscribe(isDone => { if(isDone) { this.setValues(); }});');
+    SET mytext := concat(mytext, '\n\t}');
+    SET mytext := concat(mytext, '\n');
+    SET mytext := concat(mytext, '\n\tonSubmit() {');
+    SET mytext := concat(mytext, '\n\t\tconsole.log(this.', myFormName, '.value);');
+    SET mytext := concat(mytext, '\n\t\tthis.', myServiceName, '.post', classname, ', (this.', myFormName, '.value);');
+    SET mytext := concat(mytext, '\n\t\tthis.', myServiceName, '.bDone.subscribe(isDone => { if(isDone) { this.setValues(); }});');
+    SET mytext := concat(mytext, '\n\t}');
+    SET mytext := concat(mytext, '\n');
 	SET mytext := concat(mytext, '\nrevert() { this.ngOnChanges(); }');
 	SET mytext := concat(mytext, '\n}');
 
@@ -150,4 +172,4 @@ RETURN (mytext);
 END;
 $$
 DELIMITER ;
-
+GRANT ALL ON `ccpoints`.* TO 'ccadmin'@'localhost';

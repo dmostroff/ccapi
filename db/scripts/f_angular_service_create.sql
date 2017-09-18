@@ -1,4 +1,4 @@
--- DROP FUNCTION f_angular_service_create;
+ DROP FUNCTION f_angular_service_create;
 DELIMITER $$
 CREATE FUNCTION f_angular_service_create( a_tablename text, className text) RETURNS text
   DETERMINISTIC
