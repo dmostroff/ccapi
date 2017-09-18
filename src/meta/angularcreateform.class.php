@@ -26,8 +26,8 @@ class Meta_AngularCreateForm extends Base_dblayer {
 //WHERE TABLE_NAME = 'adm_tags'
 //ORDER BY ORDINAL_POSITION 
 //;ESQL;
-            $sql = 'select ccpoints.f_angularform_create(?, ?, ?) as form';
-            $rows = dbconn::exec($dbc, $sql, [$tablename, $args['component'], $args['classname']]);
+            $sql = 'select ccpoints.f_angular_form_create(?, ?) as form';
+            $rows = dbconn::exec($dbc, $sql, [$tablename, $args['classname']]);
             foreach ($rows as $r) {
                 $res .= $r['form'];
             }

@@ -129,7 +129,7 @@ $app->get('/client/person/detail/{client_id:\d+}', new FileLoad($app, '', 'Clien
 $app->get( '/meta/tablescurl', new FileLoad( $app, "", 'Meta_TablesCurlCreate'))->setName('MetaTablesCurlCreate');
 $app->get( '/meta/{table}', new FileLoad( $app, "", 'Meta_ClassnameCreate'))->setName('metaClassnameCreate');
 $app->get( '/meta/angular/class/{table}', new FileLoad( $app, "", 'Meta_AngularCreateClass'))->setName('metaAngularCreateClass');
-$app->get( '/meta/angular/form/{table}/{component}/{classname}', new FileLoad( $app, "", 'Meta_AngularCreateForm'))->setName('metaAngularCreateForm');
+$app->get( '/meta/angular/form/{table}/{classname}', new FileLoad( $app, "", 'Meta_AngularCreateForm'))->setName('metaAngularCreateForm');
 $app->get( '/meta/angular/service/{table}/{classname}', new FileLoad( $app, "", 'Meta_AngularServiceCreate'))->setName('metaAngularServiceCreate');
 
 $app->get('/hello/{name}', function ($request, $response) {
