@@ -54,8 +54,8 @@ class Base_dblayer {
             }
             // ...read the POST'ed data
             $this->posted_ = $request->getParsedBody();
-            error_log( print_r($this->posted_, 1));
-            error_log( '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+//            error_log( print_r($this->posted_, 1));
+//            error_log( '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
 //            $this->logger_->addDebug('parsed body is', [ 'parsedBody' => $this->posted_]);
             if ($this->requiresPostedData() && (!isset($this->posted_) || empty($this->posted_))) {
 //                $this->logger_->addError('authenticate: POSTed is missing data');

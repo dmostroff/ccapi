@@ -51,6 +51,8 @@ ESQL;
         $rows = dbconn::exec($dbc, $sql, [$args['cc_company_id']]);
         $data = [];
         foreach( $rows as $r) {
+//            error_log( "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+//            error_log( print_r($r, 1));
             $data = $r;
             break;
         }
@@ -93,7 +95,11 @@ ESQL;
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
         }
-        $sql = <<<ESQL
+        if( 0 < $posted['cc_company_id']) {
+            $values[$this->idcol_] = $posted[$this->idcol_];
+            $id = $this->update( $dbc, $values);
+        } else {
+            $sql = <<<ESQL
     INSERT INTO cc_company ( cc_name
 	, url
 	, contact
@@ -123,25 +129,53 @@ ESQL;
 	, phone_fax = VALUES(phone_fax)
 	
 ESQL;
-        $id = null;
-        try {
-//            error_log($sql);
-//            error_log(print_r($values, 1));
-            dbconn::exec($dbc, $sql, $values);
-            $sql1 = "SELECT last_insert_id() as id;";
-            $rows = dbconn::exec($dbc, $sql1);
-            $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-            if( $id == 0) {
-                $sql1 = "SELECT cc_company_id FROM cc_company WHERE cc_company.cc_company_id=?;";
-                $rows = dbconn::exec($dbc, $sql1, [$posted['cc_company_id']]);
-                $id = (isset($rows[0])) ? $rows[0]['cc_company_id'] : null;
+            $id = null;
+            try {
+    //            error_log($sql);
+    //            error_log(print_r($values, 1));
+                dbconn::exec($dbc, $sql, $values);
+                $sql1 = "SELECT last_insert_id() as id;";
+                $rows = dbconn::exec($dbc, $sql1);
+                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
+                if( $id == 0) {
+                    $sql1 = "SELECT cc_company_id FROM cc_company WHERE cc_company.cc_company_id=?;";
+                    $rows = dbconn::exec($dbc, $sql1, [$posted['cc_company_id']]);
+                    $id = (isset($rows[0])) ? $rows[0]['cc_company_id'] : null;
+                }
+            } catch (Exception $ex) {
+                error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
             }
+        }
+        return ['cc_company_id' => $id] ;
+    }
+
+    public function updateCompany( $dbc, $cc_company_id, $values ) {
+        $values[] = $cc_company_id;
+        $sql =<<<ESQL
+        UPDATE cc_company
+        SET cc_name = coalesce(?, cc_name)
+            , url = ?
+            , contact = ?
+            , address_1 = ?
+            , address_2 = ?
+            , city = ?
+            , state = ?
+            , zip = ?
+            , country = coalesce( ?, 'US')
+            , phone = ?
+            , phone_2 = ?
+            , phone_cell = ?
+            , phone_fax = ?
+        WHERE cc_company_id = ?
+ESQL;
+        try {
+            dbconn::exec($dbc, $sql, $values);
         } catch (Exception $ex) {
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
-        return ['id' => $id] ;
+        return $cc_company_id;
     }
-
+    
     public function delete($dbc, $ids) {
         $sql = "DELETE FROM cc_company WHERE cc_company.cc_company_id=?";
         return dbconn::exec($dbc, $sql, [$args['cc_company_id']]);

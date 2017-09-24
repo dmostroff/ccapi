@@ -123,23 +123,34 @@ ESQL;
 // insert
 
     public function update($dbc, $vals) {
-        $qs = '? as ' . str_replace(', ', ', ? as ', $this->colsNames_);
+        $tcols = [];
+        for( $ii=0;$ii<count($this->cols_); $ii++) {
+            if( $this->cols_[$ii] != 'recorded_on') {
+                $tcols[] = $this->cols_[$ii];
+            }
+        }
         $set = implode(', ', array_map(function($x) {
                     return $x . "= ?";
-                }, $this->cols_));
-        $cols = subst(str_repeat('?,', $this->colCount_), -1);
+                }, $tcols));
+        $cols = substr(str_repeat('?,', count($tcols)), -1);
         $sql = <<<ESQL
     UPDATE {$this->table_}
     SET {$set}
     WHERE {$this->idcol_} = ?
 ESQL;
-        $rows = null;
+        $retVal = null;
         try {
-            $rows = dbconn::exec($dbc, $sql, $vals);
+            dbconn::exec($dbc, $sql, array_values($vals));
+            $retVal = $vals[$this->idcol_];
         } catch (Exception $ex) {
-            error_log(sprintf("%s %s %s", __FILE__, __METHOD__, $ex->getMessage()));
+            error_log(sprintf("!!!! %s %s %s", __FILE__, __METHOD__, $ex->getMessage()));
         }
-        return $rows;
+//        error_log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//        error_log( print_r($tcols, 1));
+//        error_log( print_r($vals, 1));
+//        error_log( print_r($retVal, 1));
+//        error_log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        return $retVal;
     }
 
 // update
