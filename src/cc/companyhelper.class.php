@@ -97,6 +97,9 @@ ESQL;
         }
         if( 0 < $posted['cc_company_id']) {
             $values[$this->idcol_] = $posted[$this->idcol_];
+//            error_log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//            error_log( print_r($values,1));
+//            error_log( "--------------------");
             $id = $this->update( $dbc, $values);
         } else {
             $sql = <<<ESQL
