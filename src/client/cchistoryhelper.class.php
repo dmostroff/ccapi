@@ -34,19 +34,6 @@ ESQL;
         return $rows;
      }
 
-    public function get( $dbc, $args) {
-        $sql=$this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE client_cchistory.cchist_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['cchist_id']]);
-        $data = [];
-        foreach( $rows as $r) {
-            $data[] = $r;
-        }
-        return $data;
-     }
-
     public function getByFk( $dbc, $args) {
         $sql .=<<<ESQL
     SELECT client_cchistory.cchist_id

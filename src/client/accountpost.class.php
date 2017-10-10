@@ -1,8 +1,8 @@
 <?php
-class Client_CcPost extends Base_dblayer {
+class Client_AccountPost extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Client_CcHelper();
+        $this->helper_ = new Client_AccountHelper();
     }
 
     public function run($args) {
@@ -12,7 +12,6 @@ class Client_CcPost extends Base_dblayer {
         if( isset($rows[$this->helper_->idcol_])) {
             $data = $this->helper_->get($dbc, $rows);
         }
-        return (isset($data[0])) ? $data[0] : null;
         return $data;
     }
 

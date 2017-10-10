@@ -7,8 +7,7 @@ class Client_PersonGet extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
-        $data = $this->helper_->get($dbc, $args);
-        return (isset($data[0])) ? $data[0] : null;
+        return $this->helper_->get($dbc, $args);
     }
 
 }

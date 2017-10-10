@@ -52,7 +52,7 @@ ESQL;
      }
 
     public function getByFk( $dbc, $args) {
-        $sql .=<<<ESQL
+        $sql =<<<ESQL
     SELECT client_business.pbiz_id
 	, client_business.client_id
 	, client_business.business_name

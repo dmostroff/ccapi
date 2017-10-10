@@ -35,19 +35,6 @@ ESQL;
         return $rows;
      }
 
-    public function get( $dbc, $args) {
-        $sql=$this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE client_financials.financial_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['financial_id']]);
-        $data = [];
-        foreach( $rows as $r) {
-            $data[] = $r;
-        }
-        return $data;
-     }
-
     public function getByFk( $dbc, $args) {
         $sql .=<<<ESQL
     SELECT client_financials.financial_id

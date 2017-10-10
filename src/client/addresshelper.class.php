@@ -54,7 +54,7 @@ ESQL;
      }
 
     public function getByFk( $dbc, $args) {
-        $sql .=<<<ESQL
+        $sql =<<<ESQL
     SELECT client_address.address_id
 	, client_address.client_id
 	, client_address.address_type
@@ -86,6 +86,12 @@ ESQL;
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
         }
+        if (isset($posted[$this->id'address_id'])) {
+            $values['client_id'] = $posted['client_id'];
+//            error_log(json_encode([__FILE__, __METHOD__, $values]));
+            $id = $this->update($dbc, $values);
+//            error_log(json_encode([__FILE__, __METHOD__, $id]));
+        } else {
         $sql = <<<ESQL
     INSERT INTO client_address ( client_id
 	, address_type
