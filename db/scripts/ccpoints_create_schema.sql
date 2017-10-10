@@ -26,7 +26,7 @@ DEFAULT CHARACTER SET utf8
 USE `ccpoints`;
 
 \! echo 'adm_users'
-CREATE TABLE IF NOT EXISTS adm_users (
+CREATE TABLE IF NOT EXISTS `adm_users` (
 	user_id bigint AUTO_INCREMENT PRIMARY KEY
 	, login varchar(32) NOT NULL
 	, pwd varchar(255)
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS adm_users (
 );
  
 \! echo 'adm_settings'
-CREATE TABLE IF NOT EXISTS adm_settings (
+CREATE TABLE IF NOT EXISTS `adm_settings` (
 	prefix varchar(16) NOT NULL
 	, keyname varchar(32) NOT NULL
 	, keyvalue text
@@ -164,30 +164,32 @@ CREATE TABLE IF NOT EXISTS `client_business`
 )
 ;
 
-\! echo 'client_cc'
-CREATE TABLE IF NOT EXISTS `client_cc` (
-    clicc_id bigint AUTO_INCREMENT PRIMARY KEY
-    , client_id bigint
-    , name varchar(255) NOT NULL
-    , ccnumber char(16) NOT NULL -- crypt
-    , expdate char(4) NOT NULL
-    , ccv varchar(255) -- crypt
-    , cc_login text
-    , cc_password varchar(255)
-    , cc_company_id bigint
-    , cc_status varchar(32)
-    , annual_fee decimal(15,5)
-    , credit_limit decimal(15,5)
-    , addtional_card boolean
-    , recorded_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    , UNIQUE INDEX (ccnumber, name)
-    , CONSTRAINT `fk_clicc_person` FOREIGN KEY (`client_id` ) REFERENCES client_person(client_id) ON DELETE CASCADE
-);
+\! echo 'client_account'
+CREATE TABLE `client_accounts` (
+  `account_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) DEFAULT NULL,
+  `cc_card_id` bigint(20) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `account` varchar(32) NOT NULL,
+  `account_info` varchar(255) NOT NULL, -- card #, expdate, cvv/cvv2
+  `cc_login` text,
+  `cc_password` varchar(255) DEFAULT NULL,
+  `cc_status` varchar(32) DEFAULT NULL,
+  `annual_fee` decimal(15,5) DEFAULT NULL,
+  `credit_limit` decimal(15,5) DEFAULT NULL,
+  `addtional_card` tinyint(1) DEFAULT NULL,
+  `recorded_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`account_id`),
+  UNIQUE KEY `account` (`account`,`name`),
+  KEY `fk_client_accounts_person` (`client_id`),
+  CONSTRAINT `fk_client_accounts_person` FOREIGN KEY (`client_id`) REFERENCES `client_person` (`client_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_client_accounts_card` FOREIGN KEY (`cc_card_id`) REFERENCES `cc_cards` (`cc_card_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 \! echo 'cc_transaction'
 CREATE TABLE IF NOT EXISTS cc_transaction (
     cctrans_id bigint AUTO_INCREMENT PRIMARY KEY
-    , clicc_id bigint
+    , account_id bigint
     , transaction_date datetime NOT NULL
     , transaction_type varchar(32) NOT NULL -- pay/charge
     , transaction_status varchar(32)
@@ -195,43 +197,43 @@ CREATE TABLE IF NOT EXISTS cc_transaction (
     , debit decimal(15,2)
     , recorded_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     , UNIQUE INDEX (transaction_date, transaction_type)
-    , CONSTRAINT `fk_cctrans_clicc` FOREIGN KEY (`clicc_id` ) REFERENCES client_cc(clicc_id) ON DELETE CASCADE
+    , CONSTRAINT `fk_cctrans_account` FOREIGN KEY (`account_id` ) REFERENCES `client_account`(`account_id`) ON DELETE CASCADE
 );
 
 \! echo 'cc_action'
 CREATE TABLE IF NOT EXISTS cc_action (
 ccaction_id bigint AUTO_INCREMENT PRIMARY KEY
-, clicc_id bigint
+, account_id bigint
 , ccaction text
 , action_type varchar(32)
 , action_status varchar(32)
 , due_date date
 , details text
 , recorded_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-, CONSTRAINT `fk_ccact_cli` FOREIGN KEY (`clicc_id`) REFERENCES client_cc(clicc_id) ON DELETE CASCADE
+, CONSTRAINT `fk_ccact_cli` FOREIGN KEY (`account_id`) REFERENCES `client_account`(`account_id`)  ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS client_cchistory (
 cchist_id bigint AUTO_INCREMENT PRIMARY KEY
-, clicc_id bigint
+, account_id bigint
 , ccevent text
 , ccevent_amt decimal(15,2)
 , details text
 , recorded_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-, CONSTRAINT `fk_cchist_cli` FOREIGN KEY (`clicc_id`) REFERENCES client_cc(clicc_id) ON DELETE CASCADE
+, CONSTRAINT `fk_cchist_account` FOREIGN KEY (`account_id`) REFERENCES `client_account`(`account_id`)  ON DELETE CASCADE
 );
 
 \! echo 'cc_bal_transfer_info'
 CREATE TABLE IF NOT EXISTS cc_baltransferinfo (
 bal_id bigint AUTO_INCREMENT PRIMARY KEY
 , client_id bigint
-, clicc_id bigint
+, account_id bigint
 , due_date date
 , total decimal(15,2)
 , credit_line decimal( 15,2)
 , recorded_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 , CONSTRAINT `fk_ccbal_cli` FOREIGN KEY (`client_id`) REFERENCES client_person(client_id) ON DELETE CASCADE
-, CONSTRAINT `fk_ccbal_clicc` FOREIGN KEY (`clicc_id`) REFERENCES client_cc(clicc_id) ON DELETE CASCADE
+, CONSTRAINT `fk_ccbal_account` FOREIGN KEY (`account_id`) REFERENCES `client_account`(`account_id`)  ON DELETE CASCADE
 );
 -- 
 /* data */
@@ -249,9 +251,14 @@ values
 , ('TRANSTYPE', 'CREDIT', 'credit')
 , ('TRANSTYPE', 'RETURNOFAF', 'Return of AF')
 , ('TRANSTYPE', 'RETURN', 'Return')
-, ('CARDSTATUS', 'PENDING', 'Pending')
-, ('CARDSTATUS', 'COMPLETED', 'Completed')
-, ('CARDSTATUS', 'VOID', 'Void')
+, ('CARDSTATUS', 'APPLIED', 'Applied')
+, ('CARDSTATUS', 'APPROVED', 'Approved')
+, ('CARDSTATUS', 'DECLINED', 'Declined')
+, ('CARDSTATUS', 'ACTIVEPOINTS', 'Active, Earning Points')
+, ('CARDSTATUS', 'LOANOFFER', 'Waiting for Loan Offer')
+, ('CARDSTATUS', 'LOANBALANCE', 'Balance for Loan')
+, ('CARDSTATUS', 'PENDING', 'Pending for Points')
+, ('CARDSTATUS', 'CLOSED', 'Closed')
 ;
 
 insert into adm_settings( prefix, keyname, keyvalue)
@@ -286,9 +293,10 @@ CREATE USER IF NOT EXISTS 'dano'@'localhost'
     PASSWORD EXPIRE NEVER
     ;
 
-GRANT ALL ON `ccpoints`.* TO 'dano'@'%'
-;
+GRANT ALL ON `ccpoints`
 
+GRANT ALL ON `ccpoints`.* TO 'ccadmin'@'%'
+;
 
 /*
 CREATE USER 'ccadmin'@'localhost'

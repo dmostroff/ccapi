@@ -5,8 +5,10 @@ CREATE FUNCTION f_angular_form_create( a_tablename text, className text) RETURNS
 BEGIN
   DECLARE mytext text;
   DECLARE mysnippet text;
+  DECLARE mydisplay text;
   DECLARE mysnippet1 text;
   DECLARE ucTable text;
+  DECLARE idCol text;
   DECLARE component text;
   DECLARE mycolumn text;
   DECLARE mydatatype text;
@@ -34,8 +36,14 @@ SET myServiceName = concat( objName, 'Service');
 SET myTitle = SUBSTRING_INDEX(className, '_', -1);
 SET myTitle = concat(UCASE(LEFT(myTitle, 1)), SUBSTRING(LOWER(myTitle), 2));
 
-SET mysnippet = '';
+SELECT COLUMN_NAME 
+INTO idCol
+FROM information_schema.columns 
+WHERE table_name = 'client_address' AND column_key = 'PRI'
+;
 
+SET mysnippet = '';
+SET mysnippet1 = '';    
 
 OPEN cursor_i;
 lp1: LOOP
@@ -44,8 +52,10 @@ lp1: LOOP
 		LEAVE lp1;
 	END IF;
 	SET formControlText = CONCAT(
-		'\n\t<div fxLayout="row" fxLayoutGap="15px">'
-		'\n\t\t<md-form-field class="form-group" fxFlex fxFlexAlign="start center">',
+		'\n\t<div',
+        CASE WHEN mycolumn = idCol THEN ' [hidden]="true"' ELSE '' END,
+        ' fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="15px">',
+		'\n\t\t<md-form-field class="form-group" fxFlex>',
 		'\n\t\t\t<input mdInput type="text" formControlName="', mycolumn, '" placeholder="', mycolumn, '">',
 		'\n\t\t\t<md-error *ngIf="', myFormName, '.hasError(\'required\')">', mycolumn, ' is <strong>required</strong>',
 		'\n\t\t\t</md-error>',
@@ -53,7 +63,21 @@ lp1: LOOP
         '\n\t</div>'
 		);
 
-    SET mysnippet = CONCAT( mysnippet, REPLACE( formControlText, 'COULUMN_NAME', mycolumn));
+	SET mydisplay = CONCAT(
+		'\n\t\t<div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="15px">'
+		,'\n\t\t\t<div fxFlex'
+        , CASE WHEN mycolumn = 'recorded_on' THEN ' fxFlexAlign="end" class="recorded_on"' ELSE '' END
+        ,'><label>'
+        , concat(UCASE(LEFT(LOWER(mycolumn), 1)), SUBSTRING(LOWER(mycolumn), 2))
+        , ':</label>{{', objName, '.', mycolumn, '}}</div>'
+        ,'\n\t\t</div>'
+		);
+
+    SET mysnippet1 = CONCAT( mysnippet1, mydisplay);
+    
+	IF mycolumn NOT IN ( 'recorded_on') THEN
+		SET mysnippet = CONCAT( mysnippet, REPLACE( formControlText, 'COULUMN_NAME', mycolumn));
+	END IF;
 END LOOP;
 CLOSE cursor_i;
     
@@ -73,21 +97,30 @@ SET mysnippet1 = CONCAT('<div fxFlex class="form-group">'
 --	;
 */
 	SET mytext := '';
-	SET mytext := concat(mytext, '<div *ngIf="', myServiceName, '.', objName, '.name" fxLayout="row">');
-	SET mytext := concat(mytext, '\n\t<h2 class="md-title" fxFlex="50%">{{', myServiceName, '.', objName, '.name}}</h2>');
-	SET mytext := concat(mytext, '\n\t<div fxFlex></div>');
-	SET mytext := concat(mytext, '\n\t<div fxFlex="5%"  fxFlexAlign="end" class="id">{{', myServiceName, '.', objName, '.id}}</div>');
-	SET mytext := concat(mytext, '\n\t<div fxFlex="16%" fxFlexAlign="end" class="recorded-on">{{', myServiceName, '.', objName, '.recorded_on}}</div>');
+	SET mytext := concat(mytext, '\n\t<h2 class="md-title" fxFlex="50%">{{title}}</h2>');
+	SET mytext := concat(mytext, '\n<div *ngIf="!isEdit && ', objName, '.', idCol, '" fxLayout="column">');
+	SET mytext := concat(mytext, '\n\t<div fxFlex>');
+	SET mytext := concat(mytext, mysnippet1);
+    SET mytext := concat(mytext, '\n\t</div>');
 	SET mytext := concat(mytext, '\n</div>');
 	SET mytext := concat(mytext, '\n');
-	SET mytext := concat(mytext, '<form [formGroup]="', myFormName, '" (ngSubmit)="onSubmit()" class="form-class" fxLayout="column" fxLayoutAlign="center center" novalidate>');
-	SET mytext := concat(mytext, '\n\t', mysnippet);
-  	SET mytext := concat(mytext, '\n\t<div fxLayout="row" fxLayoutAlign="end end">');
-	SET mytext := concat(mytext, '\n\t\t<button fxFlex="18%" md-raised-button type="submit" (click)="onSubmit()" class="submitButton">Submit</button>');
-  	SET mytext := concat(mytext, '\n\t</div>');
+	SET mytext := concat(mytext, '<h1 md-dialog-title class="primary-color">{{title}}</h1>');
+	SET mytext := concat(mytext, '\n<form [formGroup]="', myFormName, '" (ngSubmit)="onSubmit()" class="form-class" fxLayout="column" fxLayoutAlign="center center" novalidate>');
+	SET mytext := concat(mytext, '\n\t<div fxFlex fxFlexFill>');
+	SET mytext := concat(mytext, '\n\t<md-dialog-content class="accent-color"">');
+	SET mytext := concat(mytext,  mysnippet);
+	SET mytext := concat(mytext, '\n\t</md-dialog-content>');
+	SET mytext := concat(mytext, '\n\t</div>');
+	SET mytext := concat(mytext, '\n\t<div fxFlex fxFlexFill>');
+	SET mytext := concat(mytext, '\n\t<md-dialog-actions>');
+	SET mytext := concat(mytext, '\n\t\t<div fxLayout="row" fxLayoutAlign="center stretch" fxLayoutGap="20px">');
+	SET mytext := concat(mytext, '\n\t\t\t<button fxFlex="18%" md-raised-button type="submit" color="primary" class="submitButton"><md-icon>done</md-icon>Submit</button>');
+	SET mytext := concat(mytext, '\n\t\t\t<button fxFlex="18%" md-raised-button (click)="onClickCancel()"><md-icon>cancel</md-icon> Cancel</button>');
+	SET mytext := concat(mytext, '\n\t</div>');
+	SET mytext := concat(mytext, '\n\t</md-dialog-actions>');
+	SET mytext := concat(mytext, '\n\t</div>');
+	SET mytext := concat(mytext, '\n<p>Form value: {{', myFormName, '.value | json }}</p>');
 	SET mytext := concat(mytext, '\n</form>');
-	SET mytext := concat(mytext, '\n\n\t  <button md-raised-button type="submit" (click)="onSubmit()" class="loginButton">Login</button>');
-	SET mytext := concat(mytext, '\n\t\t<p>Form value: {{ '', ', myFormName, '.value | json }}</p>);');
 	SET mytext := concat(mytext, '\n');
 
 	SET mytext := concat(mytext, '\nimport { Component, Input, OnChanges } from "@angular/core";');
@@ -172,4 +205,4 @@ RETURN (mytext);
 END;
 $$
 DELIMITER ;
-GRANT ALL ON `ccpoints`.* TO 'ccadmin'@'localhost';
+-- GRANT ALL ON `ccpoints`.* TO 'ccadmin'@'localhost';

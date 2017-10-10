@@ -1,6 +1,6 @@
-DROP PROCEDURE f_company_cards_create;
+DROP PROCEDURE sp_company_cards_insert;
 DELIMITER $$
-CREATE PROCEDURE f_company_cards_create()
+CREATE PROCEDURE sp_company_cards_insert()
   DETERMINISTIC
 BEGIN
 DECLARE my_company_id integer;
@@ -33,18 +33,18 @@ VALUES (my_company_id, 'MR Plat P')
 , (my_company_id, 'MR Gold P')
 , (my_company_id, 'Delta Gold P')
 , (my_company_id, 'Delta Plat P')
-, (my_company_id, 'Delta Reserve')
+, (my_company_id, 'Delta Reserve P')
 , (my_company_id, 'SPG P')
 
 , (my_company_id, 'MR Plat B')
 , (my_company_id, 'MR Gold B')
 , (my_company_id, 'Delta Gold B')
 , (my_company_id, 'Delta Plat B')
-, (my_company_id, 'Delta Reserve')
+, (my_company_id, 'Delta Reserve B')
 , (my_company_id, 'SPG B')
 ;
 
-SELECT cc_ompany_id
+SELECT cc_company_id
 INTO my_company_id
 FROM cc_company
 WHERE cc_name = 'Chase'
