@@ -13,12 +13,14 @@ class Cc_CardsHelper extends Base_dblayerHelper {
         $sql = <<<ESQL
     SELECT cc_cards.cc_card_id
 	, cc_cards.cc_company_id
+        , cc_company.cc_name
 	, cc_cards.card_name
 	, cc_cards.version
 	, cc_cards.annual_fee
 	, cc_cards.first_year_free
 	, cc_cards.recorded_on
     FROM cc_cards
+        INNER JOIN cc_company ON cc_cards.cc_company_id=cc_company.cc_company_id
 ESQL;
         return $sql;
     }
@@ -36,23 +38,11 @@ ESQL;
         return $rows;
     }
 
-    public function get($dbc, $args) {
-        $sql = $this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE cc_cards.cc_card_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['cc_card_id']]);
-        $data = null;
-        foreach ($rows as $r) {
-            $data = $r;
-        }
-        return $data;
-    }
-
     public function getByFk($dbc, $args) {
-        $sql .=<<<ESQL
+        $sql =<<<ESQL
     SELECT cc_cards.cc_card_id
 	, cc_cards.cc_company_id
+        , cc_company.cc_name
 	, cc_cards.card_name
 	, cc_cards.version
 	, cc_cards.annual_fee

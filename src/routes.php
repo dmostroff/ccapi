@@ -106,6 +106,12 @@ $app->get('/client/cc/{clicc_id}', new FileLoad($app, '', 'Client_CcGet'))->setN
 $app->post('/client/cc', new FileLoad($app, '', 'Client_CcPost'))->setName('ClientCcPost');
 $app->delete('/client/cc', new FileLoad($app, '', 'Client_CcDelete'))->setName('ClientCcDelete');
 
+$app->get('/client/accounts', new FileLoad($app, '', 'Client_AccountGetAll'))->setName('ClientAccountGetAll');
+$app->get('/client/accounts/person/{client_id}', new FileLoad($app, '', 'Client_AccountPersonGet'))->setName('ClientAccountPersonGet');
+$app->get('/client/accounts/{account_id}', new FileLoad($app, '', 'Client_AccountGet'))->setName('ClientAccountGet');
+$app->post('/client/accounts', new FileLoad($app, '', 'Client_AccountPost'))->setName('ClientAccountPost');
+$app->delete('/client/accounts', new FileLoad($app, '', 'Client_AccountDelete'))->setName('ClientAccountDelete');
+
 $app->get('/client/cchistory', new FileLoad($app, '', 'Client_CchistoryGetAll'))->setName('ClientCchistoryGetAll');
 $app->get('/client/cchistory/{cchist_id}', new FileLoad($app, '', 'Client_CchistoryGet'))->setName('ClientCchistoryGet');
 $app->post('/client/cchistory', new FileLoad($app, '', 'Client_CchistoryPost'))->setName('ClientCchistoryPost');

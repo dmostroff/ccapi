@@ -43,22 +43,6 @@ ESQL;
         return $rows;
      }
 
-    public function get( $dbc, $args) {
-        $sql=$this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE cc_company.cc_company_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['cc_company_id']]);
-        $data = [];
-        foreach( $rows as $r) {
-//            error_log( "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-//            error_log( print_r($r, 1));
-            $data = $r;
-            break;
-        }
-        return $data;
-     }
-
     public function getByFk( $dbc, $args) {
         $sql .=<<<ESQL
     SELECT cc_company.cc_company_id
@@ -97,9 +81,6 @@ ESQL;
         }
         if( 0 < $posted['cc_company_id']) {
             $values[$this->idcol_] = $posted[$this->idcol_];
-//            error_log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-//            error_log( print_r($values,1));
-//            error_log( "--------------------");
             $id = $this->update( $dbc, $values);
         } else {
             $sql = <<<ESQL

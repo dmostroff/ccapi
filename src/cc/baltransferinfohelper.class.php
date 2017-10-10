@@ -35,21 +35,8 @@ ESQL;
         return $rows;
      }
 
-    public function get( $dbc, $args) {
-        $sql=$this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE cc_baltransferinfo.bal_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['bal_id']]);
-        $data = [];
-        foreach( $rows as $r) {
-            $data[] = $r;
-        }
-        return $data;
-     }
-
     public function getByFk( $dbc, $args) {
-        $sql .=<<<ESQL
+        $sql =<<<ESQL
     SELECT cc_baltransferinfo.bal_id
 	, cc_baltransferinfo.client_id
 	, cc_baltransferinfo.clicc_id

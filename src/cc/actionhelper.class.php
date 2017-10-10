@@ -50,7 +50,7 @@ ESQL;
      }
 
     public function getByFk( $dbc, $args) {
-        $sql .=<<<ESQL
+        $sql =<<<ESQL
     SELECT cc_action.ccaction_id
 	, cc_action.clicc_id
 	, cc_action.ccaction

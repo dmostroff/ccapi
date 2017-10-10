@@ -1,9 +1,7 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * base helper class for all db calls
  */
 
 /**
@@ -37,12 +35,14 @@ class Base_dblayerHelper {
 
 // getAll
 
-    public function get($dbc, $id) {
+    public function get($dbc, $args) {
+        error_log( '~~~~~~~~~~~~~~~~~~~~~~~~~~');
         $sql = "SELECT {$this->idcol_}, {$this->colNames_} FROM {$this->table_}";
-        error_log($sql);
-        $sql .= " WHERE " . $this->idcol_ . " = ?";
-        $rows = dbconn::exec($dbc, $sql, [$id]);
+        $sql .= sprintf( " WHERE %s.%s = ?", $this->table_, $this->idcol_);
+        $rows = dbconn::exec($dbc, $sql, [$args[$this->idcol_]]);
+        error_log(print_r([$sql, $values, $rows],1));
         $retVal = (isset($rows[0])) ? $rows[0] : null;
+        error_log( '==================================');
         return $retVal;
     }
 

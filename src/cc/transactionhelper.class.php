@@ -36,19 +36,6 @@ ESQL;
         return $rows;
      }
 
-    public function get( $dbc, $args) {
-        $sql=$this->getSelectSql();
-        $sql .=<<<ESQL
-        WHERE cc_transaction.cctrans_id=?
-ESQL;
-        $rows = dbconn::exec($dbc, $sql, [$args['cctrans_id']]);
-        $data = [];
-        foreach( $rows as $r) {
-            $data[] = $r;
-        }
-        return $data;
-     }
-
     public function getByFk( $dbc, $args) {
         $sql .=<<<ESQL
     SELECT cc_transaction.cctrans_id
