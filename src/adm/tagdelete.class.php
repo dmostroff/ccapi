@@ -14,7 +14,7 @@
 class Adm_TagDelete extends Adm_TagsBase {
 
     public function run($dbc, $args) {
-        $data = $this->helper_->delete( $dbc, $this->posted_);
+        $data = $this->helper_->delete( $dbc, $args, $this->posted_);
         return $data;
     }
 

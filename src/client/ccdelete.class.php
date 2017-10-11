@@ -7,7 +7,7 @@ class Client_CcDelete extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
-        $data = $this->helper_->delete($dbc, $args);
+        $data = $this->helper_->delete($dbc, $args, $this->posted_);
         return $data;
     }
 

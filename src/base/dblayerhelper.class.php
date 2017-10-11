@@ -155,7 +155,8 @@ ESQL;
 
 // update
 
-    public function delete($dbc, $id) {
+    public function delete($dbc, $args, $posted) {
+        $id = (isset($args[$this->idcol_])) ? $args[$this->idcol_] : $posted[$this->idcol_];
         $sql = "DELETE FROM {$this->table_} WHERE {$this->idcol_} = ? RETURNING {$this->idcol_}";
         return dbconn::exec($dbc, $sql, [$id]);
     }
@@ -172,7 +173,7 @@ ESQL;
         return;
     }
     
-    public static function delete_($dbc, $args) {
+    public static function delete_($dbc, $args, $posted) {
         return;
     }
 
