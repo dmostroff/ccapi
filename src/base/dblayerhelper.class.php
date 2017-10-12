@@ -157,7 +157,7 @@ ESQL;
 
     public function delete($dbc, $args, $posted) {
         $id = (isset($args[$this->idcol_])) ? $args[$this->idcol_] : $posted[$this->idcol_];
-        $sql = "DELETE FROM {$this->table_} WHERE {$this->idcol_} = ? RETURNING {$this->idcol_}";
+        $sql = "DELETE FROM {$this->table_} WHERE {$this->idcol_} = ?";
         return dbconn::exec($dbc, $sql, [$id]);
     }
     

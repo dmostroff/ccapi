@@ -54,6 +54,7 @@ $app->get('/admin/users', new FileLoad($app, '', 'Adm_UsersGetAll'))->setName('A
 $app->get('/admin/users/{user_id}', new FileLoad($app, '', 'Adm_UsersGet'))->setName('AdmUsersGet');
 $app->post('/admin/users', new FileLoad($app, '', 'Adm_UsersPost'))->setName('AdmUsersPost');
 $app->post('/admin/users/login', new FileLoad($app, '', 'Adm_UsersLogin'))->setName('AdmUsersLogin');
+$app->post('/admin/users/logout', new FileLoad($app, '', 'Adm_UsersLogout'))->setName('AdmUsersLogout');
 $app->delete('/admin/users', new FileLoad($app, '', 'Adm_UsersDelete'))->setName('AdmUsersDelete');
 
 

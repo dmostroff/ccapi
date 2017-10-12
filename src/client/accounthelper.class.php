@@ -131,12 +131,6 @@ ESQL;
         }
         return [$this->idcol_ => $id];
     }
-
-    public function delete($dbc, $args) {
-        $sql = "DELETE FROM client_accounts WHERE client_accounts.account_id=?";
-        return dbconn::exec($dbc, $sql, [$args[$this->idcol_]]);
-    }
-
 }
 
 ?>

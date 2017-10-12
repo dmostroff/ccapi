@@ -7,6 +7,8 @@ class Client_AccountDelete extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
+        error_log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        error_log(print_r($this->posted_,1));
         $data = $this->helper_->delete($dbc, $args, $this->posted_);
         return $data;
     }

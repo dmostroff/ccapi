@@ -78,7 +78,11 @@ ESQL;
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
         }
-        $sql = <<<ESQL
+        if( $posted[$this->idcols_] > 0) {
+            $values[$this->idcols_] = $posted[$this->idcols_];
+            $this->update($dbc, $values);
+        } else {
+            $sql = <<<ESQL
     INSERT INTO cc_action ( clicc_id
 	, ccaction
 	, action_type
@@ -94,29 +98,20 @@ ESQL;
 	, details = VALUES(details)
 	
 ESQL;
-        $id = null;
-        try {
-//            error_log($sql);
-//            error_log(print_r($values, 1));
-            dbconn::exec($dbc, $sql, $values);
-            if(1) {
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-            } else {
+            $id = null;
+            try {
+    //            error_log($sql);
+    //            error_log(print_r($values, 1));
+                dbconn::exec($dbc, $sql, $values);
                 $sql1 = "SELECT ccaction_id FROM cc_action WHERE cc_action.ccaction_id=?;";
                 $rows = dbconn::exec($dbc, $sql1, [$args]);
                 $id = (isset($rows[0])) ? $rows[0] : null;
+            } catch (Exception $ex) {
+                error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
             }
-        } catch (Exception $ex) {
-            error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
         return ['id' => $id] ;
     }
 
-    public function delete($dbc, $ids) {
-        $sql = "DELETE FROM cc_action WHERE cc_action.ccaction_id=?";
-        return dbconn::exec($dbc, $sql, [$args['ccaction_id']]);
-    }
 }
 ?>
