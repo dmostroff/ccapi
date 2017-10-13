@@ -52,7 +52,9 @@ ESQL;
         $sql = <<<ESQL
     SELECT client_accounts.account_id
 	, client_accounts.client_id
-	, client_accounts.name
+	, coalesce(client_accounts.name
+            , trim(concat(trim(concat(client_person.first_name, ' ', client_person.middle_name), ' ', client_person.last_name))
+               ) as name
 	, client_accounts.cc_card_id
         , cc_cards.card_name
 	, client_accounts.account
