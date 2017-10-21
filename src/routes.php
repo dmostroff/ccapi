@@ -94,6 +94,7 @@ $app->delete('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionDelete'))-
  ------------------------------------------------------------*/
 $app->get('/client/address', new FileLoad($app, '', 'Client_AddressGetAll'))->setName('ClientAddressGetAll');
 $app->get('/client/address/{address_id}', new FileLoad($app, '', 'Client_AddressGet'))->setName('ClientAddressGet');
+$app->get('/client/person/{client_id}/address', new FileLoad($app, '', 'Client_AddressPersonGetAll'))->setName('ClientAddressPersonGetAll');
 $app->post('/client/address', new FileLoad($app, '', 'Client_AddressPost'))->setName('ClientAddressPost');
 $app->delete('/client/address', new FileLoad($app, '', 'Client_AddressDelete'))->setName('ClientAddressDelete');
 

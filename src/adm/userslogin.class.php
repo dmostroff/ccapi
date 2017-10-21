@@ -20,8 +20,19 @@ ESQL;
                 unset($data['pwd']);
                 $length = 20;
                 $token = bin2hex(random_bytes($length));
-                $data['token'] = $token;
-                $data['posted'] = $this->posted_;
+                if(isset($this->token_)) {
+                    $sqlLogin = "SELECT f_login( ?, ?) as valid_login";
+                    $valLogin = [ $data['login'], $this->token_];
+                    $retVal = dbconn::exec($dbc, $sqlLogin, $valLogin);
+                    if( isset($retVal[0])) {
+                        if($retVal[0]['valid_login'] == 0) {
+                            $this->token_ = $token;
+                        }
+                    }
+                } else {
+                    $this->token_ = $token;
+                }
+              $data['posted'] = $this->posted_;
             } else {
                 $data['token'] = null;
             }

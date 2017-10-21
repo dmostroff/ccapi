@@ -17,6 +17,7 @@ class Base_dblayer {
     public $dbc_;
     protected $helper_ = null;
     protected $requiresContentType_ = true;
+    protected $token_ = null;
 
     public function __construct($app) {
         $this->app_ = $app;
@@ -40,6 +41,9 @@ class Base_dblayer {
         }
         if (isset($args['apivers'])) {
             $this->apiversion_ = $args['apivers'];
+        }
+        if ($request->hasHeader('Authorization')) {
+            $this->token_ = $request->getHeaderLine('Authorization');
         }
 
         if ($request->getMethod() == 'POST'
@@ -80,6 +84,7 @@ class Base_dblayer {
     public function invoke($request, $response, $args) {
         try {
             $data = $this->run($args);
+            $data['token'] = $_SESSION['token'];
             $rc = 0;
             $msg = 'OK';
             $retStatus = 200;
@@ -131,6 +136,9 @@ class Base_dblayer {
         }
         $r = $response->withStatus($respStatus);
         $r = $r->withHeader('Content-type', 'application/json');
+        if( isset($this->token_)) {
+            $r = $r->withHeader('Authorization', $this->token_);
+        }
         $r->getBody()->write(json_encode($ret, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
         return $r;
     }
