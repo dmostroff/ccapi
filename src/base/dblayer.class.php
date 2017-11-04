@@ -84,7 +84,6 @@ class Base_dblayer {
     public function invoke($request, $response, $args) {
         try {
             $data = $this->run($args);
-            $data['token'] = $_SESSION['token'];
             $rc = 0;
             $msg = 'OK';
             $retStatus = 200;
