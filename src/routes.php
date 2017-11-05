@@ -5,7 +5,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
+require_once('middleware.php');
 
 //$logger = $app->getContainer()['logger'] ;
 //$router = $app->getContainer()['router'] ;
@@ -15,9 +15,10 @@ if(true) {
  $app->options('/{routes:.+}', function($req, $resp, $args) use($app) {
     return $resp ;
  }) ;
- 
  $app->add(function ($req, $res, $next) {
-   $response = $next($req, $res);
+   $mw = new middleware();
+   $response = $mw->__invoke($req, $res, $next);
+//   $response = $next($req, $res);
    return $response
            ->withHeader('Access-Control-Allow-Origin', '*')
            ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')

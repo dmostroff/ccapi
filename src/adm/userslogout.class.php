@@ -7,31 +7,28 @@ class Adm_UsersLogout extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
-        $sql = $this->helper_->getSelectSql( );
-        $sql .=<<<ESQL
-    WHERE login = ?        
+        $sql = <<<ESQL
+    DELETE FROM adm_sessions
+    WHERE login = ?
+        AND token = ?
 ESQL;
-        $values = [$this->posted_['login']];
-        $data = null;
-        if( isset($this->posted_['token'])) {
-            $data = ['logut' => 'ok'
-                , 'login' => $this->posted_['login']
-                , 'token' => $this->posted_['token']
-           ];
+        $values = [$this->posted_['login'], $this->posted_['token']];
+        $data = [];
+        $rows = dbconn::exec($dbc, $sql, $values);
+        if( isset($rows[0])) {
+            $data = $rows[0];
         }
-//        $rows = dbconn::exec($dbc, $sql, $values);
-//        if( isset($rows[0])) {
-//            $data = $rows[0];
-//            if( password_verify( $this->posted_['pwd'], $data['pwd'])) {
-//                unset($data['pwd']);
-//                $length = 20;
-//                $token = bin2hex(random_bytes($length));
-//                $data['token'] = $token;
-//                $data['posted'] = $this->posted_;
-//            } else {
-//                $data['token'] = null;
-//            }
-//        }
+        $sql = <<<ESQL
+    SELECT * FROM adm_sessions
+    WHERE login = ?
+        AND token = ?
+ESQL;
+        $values = [$this->posted_['login'], $this->posted_['token']];
+        $data = ['deleted'];
+        $rows = dbconn::exec($dbc, $sql, $values);
+        if( isset($rows[0])) {
+            $data = $rows[0];
+        }
         return $data;
     }
 

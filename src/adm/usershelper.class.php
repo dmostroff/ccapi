@@ -99,7 +99,7 @@ ESQL;
         return (isset($rows[0])) ? $rows[0] : null;
     }
 
-    public function delete($dbc, $ids) {
+    public function delete($dbc, $ids, $posted) {
         $sql = "DELETE FROM adm_users WHERE adm_users.user_id=?";
         return dbconn::exec($dbc, $sql, [$args['user_id']]);
     }
