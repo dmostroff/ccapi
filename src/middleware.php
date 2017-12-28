@@ -11,38 +11,33 @@
  *
  * @author DANO
  */
+require_once "authenticate.php";
+
 class middleware {
     public function __invoke($request, $response, $next) {
         $retVal = false;
+        $token = null;
         $uri = $request->getUri();
-        if( 0 < preg_match('/login/', $uri)) {
+        if( 0 < strpos($uri, '/login')) {
             $retVal = true;
         } else {
-            error_log( 'header?');
-            if ($request->hasHeader('Authorization')) {
+            $ipAddress = $request->getAttribute('ip_address');
+            error_log( "ipAddress [" . $ipAddress . "]");
+            $ip = $_SERVER['REMOTE_ADDR']?:($_SERVER['HTTP_X_FORWARDED_FOR']?:$_SERVER['HTTP_CLIENT_IP']);
+            error_log( "ipAddress (" . $ip . ")");
+           if ($request->hasHeader('Authorization')) {
                 $token = $request->getHeaderLine('Authorization');
-                error_log( 'TOKEN: ' . $token);
-
-                $dbc = dbconn::connect(Config::CFG_INI_FILENAME);
-                $sql = "SELECT f_login_validate(?) as tokenvalid";
-                $values = [$token];
-                try {
-                    error_log( $sql);
-                    $rows = dbconn::exec($dbc, $sql, $values);
-                    error_log( json_encode($rows));
-                    if( isset($rows[0]) && $rows[0]['tokenvalid']) {
-                        $retVal = (1 == $rows[0]['tokenvalid']) ? true : false;
-                    }
-                } catch (Exception $ex) {
-                    error_log(sprintf("%s %d] %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
-                }
+                error_log( 'TOKEN0: ' . $token);
+                $token = preg_replace( '/^Bearer /', '', $token);
+                error_log( 'TOKEN1: ' . $token);
+                $retVal = Authorization::validate_token($token);
             }
         }
         if( $retVal) {
            $response = $next($request, $response); 
         } else {
-            $ret = [ 'rc' => -1, 'msg'=>'Invalid user'];
-            $response = $response->withStatus(401);
+            $ret = ['res' => [ 'rc' => -1, 'msg'=>'Invalid user'], 'data' => $token];
+            $response = $response->withStatus(200);
             $response = $response->withHeader('Content-type', 'application/json');
             $response->getBody()->write(json_encode($ret, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
         }

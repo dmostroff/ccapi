@@ -1,4 +1,5 @@
 <?php
+require_once "authenticate.php";
 
 class Adm_UsersLogin extends Base_dblayer {
 
@@ -7,6 +8,7 @@ class Adm_UsersLogin extends Base_dblayer {
     }
 
     public function invoke($request, $response, $args) {
+        $data = null;
         try {
             $data = $this->run($args);
             if (isset($data) && isset($data['token'])) {
@@ -45,17 +47,10 @@ ESQL;
 //            error_log( "=====================");
             if (password_verify($this->posted_['pwd'], $data['pwd'])) {
                 unset($data['pwd']);
-                $length = 20;
-                $token = bin2hex(random_bytes($length));
-                $sqlLogin = "SELECT f_login( ?, ?) as valid_login";
-                $valLogin = [ $data['login'], $token];
-                $retVal = dbconn::exec($dbc, $sqlLogin, $valLogin);
-                if (isset($retVal[0]) && $retVal[0]['valid_login'] > 0) {
-                    $data['token'] = $this->token_ = $token;
-                    error_log(print_r($retVal,1));
-                } else {
-                    $this->token_ = null;
-                }
+                $token = Authenticate::generate_token();
+                Authenticate::persist_token($token);
+                $data['token'] = $this->token_ = $token;
+                error_log(print_r($data,1));
             } else {
                 $this->token_ = null;
             }
