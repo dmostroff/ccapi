@@ -5,6 +5,35 @@ echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/fqdn.conf && 
 sudo apt install mysql-server
 sudo apt install pv
 service apache2 restart
+
+#########
+# redis
+#########
+sudo apt-get install redis-server
+sudo systemctl start redis
+systemctl status redis
+redis-cli
+127.0.0.1:6379> ping
+PONG
+127.0.0.1:6379> set testk "tree tops"
+OK
+127.0.0.1:6379> get tesk
+##################################
+# pghpredis
+##################################
+sudo apt install php7.0-dev
+sudo apt install git
+git clone https://github.com/phpredis/phpredis.git
+sudo phpize
+cd phpredis 
+sudo phpize 
+sudo ./configure 
+sudo make 
+sudo make install 
+#Now, copy and paste the content of “modules” folder to the PHP extension directory and add the following lines in php.ini.
+# extension = redis.so
+##################################
+
 apt-get install mysql-server libapache2-mod-auth-mysql php5-mysql php-mcrypt
 apt-get install mysql-workbench
 apt-get install php-mcrypt
@@ -27,7 +56,14 @@ php -r "if (hash_file('SHA384', 'composer-setup.php') === '669656bab3166a7aff8a7
 php composer-setup.php
 php -r "unlink('composer-setup.php');"
 mv composer.phar /usr/local/bin/composer
-
+composer require bshaffer/oauth2-server-php "~1.8"
+$dsn='192.168.45.205';
+$username='dano';
+$password='chesed';
+$storage = new OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
+$server = new OAuth2\Server($storage);
+$server->addGrantType(new OAuth2\GrantType\AuthorizationCode($storage)); // or any grant type you like!
+$server->handleTokenRequest(OAuth2\Request::createFromGlobals())->send();
 
 sudo mkdir -p /var/www/ccpoints/frontend/html
 sudo mkdir -p /var/www/ccpoints/backend
