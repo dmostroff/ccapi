@@ -1,5 +1,5 @@
 <?php
-require_once "authenticate.php";
+// require_once "../authenticate.php";
 
 class Adm_UsersLogin extends Base_dblayer {
 
@@ -48,8 +48,9 @@ ESQL;
             if (password_verify($this->posted_['pwd'], $data['pwd'])) {
                 unset($data['pwd']);
                 $token = Authenticate::generate_token();
-                Authenticate::persist_token($token);
+                Authenticate::persist_token($token, $data);
                 $data['token'] = $this->token_ = $token;
+                $data['validate'] = Authenticate::validate_token($this->token_);
                 error_log(print_r($data,1));
             } else {
                 $this->token_ = null;

@@ -2,12 +2,13 @@
 define('TOKTTL', 240*60) ;
 define('CHECK_SRC_IP', false) ;
 class Authenticate {
+    const KEYPREFIX_ = "OSTENT:TOKEN";
   public static function generate_token() {
     return hash('sha1', 'random - ' . bin2hex(openssl_random_pseudo_bytes(1024)) . ' - numbers!') ;
   }
   public static function has_admin_to($tok, $clientid) {
     // ...how we store it
-    $systok = "CLOUD:TOKEN:{$tok}" ;
+    $systok = self::KEYPREFIX_ . ':' . $tok;
     // ...can we find it in Redis?
     $red = new Redis() ;
     $red->connect('localhost') ;
@@ -22,7 +23,7 @@ class Authenticate {
   }
   public static function persist_token($tok, $appattrs) {
     // ...how we store it
-    $systok = "CLOUD:TOKEN:{$tok}" ;
+    $systok = self::KEYPREFIX_ . ':' . $tok;
     // ..what we store on SYSTEM level
     $sysattrs = array(
                   '_created'=>date('c')
@@ -43,7 +44,7 @@ class Authenticate {
   }
   public static function release_token($tok) {
     // ...how we store it
-    $systok = "CLOUD:TOKEN:{$tok}" ;
+    $systok = self::KEYPREFIX_ . ':' . $tok;
     // ...can we find it in Redis?
     $red = new Redis() ;
     $red->connect('localhost') ;
@@ -52,8 +53,9 @@ class Authenticate {
   // ...also vivifies the token (i.e. resets TTL to max)
   public static function validate_token($tok, $check_src_ip=CHECK_SRC_IP) {
     // ...how we stored it
-    $systok = "CLOUD:TOKEN:{$tok}" ;
+    $systok = self::KEYPREFIX_ . ':' . $tok;
     // ...can we find it in Redis?
+    error_log( $systok);
     $red = new Redis() ;
     $red->connect('localhost') ;
     if($red->exists($systok)) {
@@ -79,7 +81,7 @@ class Authenticate {
   }
   public static function fetch_app_attrs($tok) {
     // ...how we stored it
-    $systok = "CLOUD:TOKEN:{$tok}" ;
+    $systok = self::KEYPREFIX_ . ':' . $tok;
     // ...can we find it in Redis?
     $red = new Redis() ;
     $red->connect('localhost') ;
