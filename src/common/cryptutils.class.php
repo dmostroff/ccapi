@@ -6,7 +6,45 @@ Class cryptutils {
   const checkVar = "CRYPT_CHECK";
 
   const defaultKeyBase64 = "VXS6nVbsmy+sY55jelwjoW+qDTYt/iMi3Vne01nDCwk=";
+  
+  const cipher = 'id-aes256-GCM';
+  
+  public static function getKeys($cfgfile, $section = 'crypt') {
+    if (!$cryptsettings = utils::read_ini_section($cfgfile, $section)) {
+        throw new exception(sprintf("Unable to open %s", $cfgfile));
+    }
+    $key = utils::getArrayVal($cryptsettings, 'key', cryptutils::defaultKeyBase64);
+    $iv = utils::getArrayVal($cryptsettings, 'iv', cryptutils::defaultKeyBase64);
+    $retVal = ['key' => hex2bin($key), 'iv' => hex2bin($iv)];
+    return $retVal;
+  }
 
+  public static function sslEncrypt( $data, $key=null, $iv=null) {
+   if( empty($key) || empty($iv)) {
+    $keys = self::getKeys(Config::CFG_INI_FILENAME);
+    if( empty($key)) {
+        $key = $keys['key'];
+    }
+    if( empty($iv)) {
+        $iv = $keys['iv'];
+    }
+   }
+//   error_log( json_encode([$data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv]));
+   return openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
+  }
+
+  public static function sslDecrypt( $data, $key=null, $iv=null) {
+   if( empty($key) || empty($iv)) {
+    $keys = self::getKeys(Config::CFG_INI_FILENAME);
+    if( empty($key)) {
+        $key = $keys['key'];
+    }
+    if( empty($iv)) {
+        $iv = $keys['iv'];
+    }
+   }
+   return openssl_decrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
+  }
 
   public static function defaultKey() {
     return(base64_decode(self::defaultKeyBase64));

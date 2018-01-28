@@ -133,7 +133,7 @@ ESQL;
         return ['client_id' => $id];
     }
 
-    public function delete($dbc, $ids) {
+    public function delete($dbc, $ids, $posted) {
         $sql = "DELETE FROM client_person WHERE client_person.client_id=?";
         return dbconn::exec($dbc, $sql, [$args['client_id']]);
     }

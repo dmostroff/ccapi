@@ -36,13 +36,10 @@ class Base_dblayerHelper {
 // getAll
 
     public function get($dbc, $args) {
-        error_log( '~~~~~~~~~~~~~~~~~~~~~~~~~~');
         $sql = "SELECT {$this->idcol_}, {$this->colNames_} FROM {$this->table_}";
         $sql .= sprintf( " WHERE %s.%s = ?", $this->table_, $this->idcol_);
         $rows = dbconn::exec($dbc, $sql, [$args[$this->idcol_]]);
-        error_log(print_r([$sql, $values, $rows],1));
         $retVal = (isset($rows[0])) ? $rows[0] : null;
-        error_log( '==================================');
         return $retVal;
     }
 
@@ -75,8 +72,11 @@ ESQL;
         }
         $colNames = implode(', ', $cols);
         $qs = substr(str_repeat('?,', count($cols)), 0, -1);
+        $parms = implode(', ', array_map(function($x) {
+                    return "? as " . $x;
+                }, $cols));
         $set = implode(', ', array_map(function($x) {
-                    return $x . "= VALUES(" . $x . ")";
+                    return $x . "=parms." . $x;
                 }, $cols));
 //        error_log( print_r($vals,1));
 //        error_log("!!!!!!!!!!!!!!!!!!!!!!");
@@ -85,17 +85,27 @@ ESQL;
 //        error_log( $qs);
 //        error_log( $set);
         $sql = <<<ESQL
+    WITH parms AS (
+      SELECT {$parms}
+    ), upd AS (
+      UPDATE {$this->table_}
+      SET {$set}
+      FROM parms
+      WHERE {$this->idcol_} = ?
+      RETURNING {$colNames}
+    )
     INSERT INTO {$this->table_} ( {$colNames} )
-    VALUES({$qs})
-    ON DUPLICATE KEY UPDATE {$set}
+    SELECT {$colNames}
+    FROM parms
+    WHERE NOT EXIST (SELECT 1 FROM upd)
+    RETURNING {$this->idcol_}, {$this->colNames_}
+    
 ESQL;
         $id = null;
         try {
-            error_log($sql);
-            error_log(print_r($values, 1));
-            dbconn::exec($dbc, $sql, $values);
-            $sql1 = "SELECT last_insert_id();";
-            $rows = dbconn::exec($dbc, $sql);
+//            error_log($sql);
+//            error_log(print_r($values, 1));
+            $rows = dbconn::exec($dbc, $sql, $values);
             $id = (isset($rows[0])) ? $rows[0][0] : null;
         } catch (Exception $ex) {
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));

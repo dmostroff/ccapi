@@ -41,7 +41,7 @@ if (!class_exists('dbconn')) {
                     , $dbsettings['port']
                     , $dbsettings['dbname']
             );
-
+            error_log( $dns);
             return new PDO($dns, $dbsettings['username'], $dbsettings['password']);
         }
 

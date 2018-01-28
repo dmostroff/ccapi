@@ -83,56 +83,64 @@ ESQL;
     }
 
     public function post($dbc, $args, $posted) {
+        error_log(__METHOD__ . ':' . json_encode($posted));
         $values = [];
+        $values[$this->idcol_] = getArrayVal( $posted, $this->idcol_);
         $insertCols = explode(',', 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card');
         foreach ($insertCols as $col) {
             $col = trim($col);
             $values[$col] = getArrayVal($posted, $col);
         }
-        if (isset($posted[$this->idcol_])) {
-            $values[$this->idcol_] = $posted[$this->idcol_];
-            $id = $this->update($dbc, $values);
-        } else {
-            $sql = <<<ESQL
-    INSERT INTO client_accounts ( client_id
-	, name
-	, cc_card_id
-	, account
-	, account_info
-	, cc_login
-	, cc_password
-	, cc_status
-	, annual_fee
-	, credit_limit
-	, addtional_card )
-    VALUES(?,?,?,?,?,?,?,?,?,?,?)
-    ON DUPLICATE KEY UPDATE client_id = VALUES(client_id)
-	, name = VALUES(name)
-	, cc_card_id = VALUES(cc_card_id)
-	, account = VALUES(account)
-	, account_info = VALUES(account_info)
-	, cc_login = VALUES(cc_login)
-	, cc_password = VALUES(cc_password)
-	, cc_status = VALUES(cc_status)
-	, annual_fee = VALUES(annual_fee)
-	, credit_limit = VALUES(credit_limit)
-	, addtional_card = VALUES(addtional_card)
-	
+        error_log(json_encode($values));
+        $sql = <<<ESQL
+    WITH parms AS (
+        SELECT ? as account_id
+	, ? as name
+	, ? as cc_card_id
+	, ? as account
+	, ? as account_info
+	, ? as cc_login
+	, ? as cc_password
+	, ? as cc_status
+	, ? as annual_fee
+	, ? as credit_limit
+	, ? as addtional_card
+    ), upd AS (
+        UPDATE client_accounts
+        SET 
+            name = parms.name
+            , cc_card_id = parms.cc_card_id
+            , account = parms.account
+            , account_info = parms.account_info
+            , cc_login = parms.cc_login
+            , cc_password = parms.cc_password
+            , cc_status = parms.cc_status
+            , annual_fee = parms.annual_fee
+            , credit_limit = parms.credit_limit
+            , addtional_card = parms.addtional_card
+        FROM parms
+        WHERE client_accounts.account_id = parms.account_id
+        RETURNING client_accounts.account_id
+    )
+    INSERT INTO client_accounts (  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card)
+    SELECT  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card
+    FROM parms
+    WHERE NOT EXISTS (SELECT 1 FROM upd)
+    RETURNING client_accounts.account_id
 ESQL;
-            $id = null;
-            try {
+        $id = null;
+        try {
+            error_log( print_r($dbc, 1));
             error_log($sql);
             error_log(print_r($values, 1));
-                dbconn::exec($dbc, $sql, $values);
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-            } catch (Exception $ex) {
-                error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
-            }
+            $rows = dbconn::exec($dbc, $sql, $values);
+            $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : $values[$this->idcol_];
+        } catch (Exception $ex) {
+            error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
         return [$this->idcol_ => $id];
     }
+
 }
 
 ?>

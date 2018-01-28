@@ -7,12 +7,28 @@ class Client_AccountPost extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
+        error_log(__METHOD__ . ':' . json_encode($this->posted_));
+        $this->posted_['account_date'] = date( 'Y-m-d', strtotime($this->posted_['account_date']));
+        $this->posted_['account'] = $this->accrypt();
         $rows = $this->helper_->post($dbc, $args, $this->posted_);
         $data = null;
         if( isset($rows[$this->helper_->idcol_])) {
             $data = $this->helper_->get($dbc, $rows);
         }
         return $data;
+    }
+    
+    private function accrypt( ) {
+        $accnum = preg_replace( '/[^\d]/', '', $this->posted_['account_num']);
+        $accinfo = preg_replace( '/[^\d]/', '', $this->posted_['account_info']);
+        $accdate = preg_replace( '/[^\d]/', '', $this->posted_['account_date']);
+        $account = sprintf( "%s^%s~%s", $accnum, $accinfo, $accdate);
+        $retStr = cryptutils::sslEncrypt ( $account);
+        $dec = cryptutils::sslDecrypt( $retStr);
+        error_log( $account);
+        error_log( $retStr);
+        error_log( $dec);
+        return $retStr;
     }
 
 }
