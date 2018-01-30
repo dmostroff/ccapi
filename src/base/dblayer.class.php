@@ -43,7 +43,8 @@ class Base_dblayer {
             $this->apiversion_ = $args['apivers'];
         }
         if ($request->hasHeader('Authorization')) {
-            $this->token_ = $request->getHeaderLine('Authorization');
+            $token1 = $request->getHeaderLine('Authorization');
+            $this->token_ = preg_replace( '/^Bearer /', '', $token1);
         }
 
         if ($request->getMethod() == 'POST'

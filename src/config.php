@@ -1,7 +1,7 @@
 <?php
 class Config {
   // const CFG_INI_FILENAME = '/etc/ostent/ccapi.ini';
-  const CFG_INI_FILENAME = '/etc/ostent/accupoints.ini';
+  const CFG_INI_FILENAME = '/etc/ostent/cardpoints.ini';
   
   const CFG_COMMON_DIR = '../src/common';
   static function cfgvars() {

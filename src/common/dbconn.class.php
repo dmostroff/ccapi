@@ -30,9 +30,9 @@ if (!class_exists('dbconn')) {
             }
 
             error_log(print_r($dbsettings, 1));
-            $dbsettings['driver'] = utils::getArrayVal($dbsettings, 'driver', 'mysql');
+            $dbsettings['driver'] = utils::getArrayVal($dbsettings, 'driver', 'pqsql');
             $dbsettings['host'] = utils::getArrayVal($dbsettings, 'host', 'localhost');
-            $dbsettings['port'] = utils::getArrayVal($dbsettings, 'port', '3306');
+            $dbsettings['port'] = utils::getArrayVal($dbsettings, 'port', '5432');
 
 
             $dns = sprintf("%s:host=%s;port=%s;dbname=%s"

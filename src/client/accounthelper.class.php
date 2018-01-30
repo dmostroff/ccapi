@@ -83,7 +83,13 @@ ESQL;
     }
 
     public function post($dbc, $args, $posted) {
-        error_log(__METHOD__ . ':' . json_encode($posted));
+	$posted['client_id']  = 2;
+	$posted['name'] = 'aapolonius';
+	$posted['cc_login']  = 'Caeser';
+	$posted['name'] = 'aapolonius';
+	$posted['cc_status'] = 'active';
+	$posted['annual_fee'] = 100;
+	$posted['credit_limit'] = 200;
         $values = [];
         $values[$this->idcol_] = getArrayVal( $posted, $this->idcol_);
         $insertCols = explode(',', 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card');
@@ -94,21 +100,22 @@ ESQL;
         error_log(json_encode($values));
         $sql = <<<ESQL
     WITH parms AS (
-        SELECT ? as account_id
-	, ? as name
-	, ? as cc_card_id
-	, ? as account
-	, ? as account_info
-	, ? as cc_login
-	, ? as cc_password
-	, ? as cc_status
-	, ? as annual_fee
-	, ? as credit_limit
-	, ? as addtional_card
+        SELECT ?::integer as account_id
+        , coalesce(?,0)::bigint as client_id
+	, ?::text as name
+	, ?::bigint as cc_card_id
+	, ?::text as account
+	, ?::text as account_info
+	, ?::text as cc_login
+	, ?::text as cc_password
+	, ?::text as cc_status
+	, ?::numeric as annual_fee
+	, ?::numeric as credit_limit
+	, substr(?, 1,1)::text as addtional_card
     ), upd AS (
         UPDATE client_accounts
-        SET 
-            name = parms.name
+        SET client_id = parms.client_id
+            , name = parms.name
             , cc_card_id = parms.cc_card_id
             , account = parms.account
             , account_info = parms.account_info
@@ -123,7 +130,14 @@ ESQL;
         RETURNING client_accounts.account_id
     )
     INSERT INTO client_accounts (  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card)
-    SELECT  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card
+    SELECT client_id
+        , name
+        , cc_card_id
+        , account
+        , account_info
+        , cc_login
+        , cc_password
+            , cc_status, annual_fee, credit_limit, addtional_card
     FROM parms
     WHERE NOT EXISTS (SELECT 1 FROM upd)
     RETURNING client_accounts.account_id
