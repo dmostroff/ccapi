@@ -30,7 +30,9 @@ Class cryptutils {
     }
    }
 //   error_log( json_encode([$data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv]));
-   return openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
+   $encrypt = openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_ZERO_PADDING, $iv);
+   error_log( $encrypt);
+   return $encrypt;
   }
 
   public static function sslDecrypt( $data, $key=null, $iv=null) {
@@ -43,7 +45,7 @@ Class cryptutils {
         $iv = $keys['iv'];
     }
    }
-   return openssl_decrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
+   return openssl_decrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA , $iv);
   }
 
   public static function defaultKey() {
