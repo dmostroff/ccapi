@@ -84,12 +84,6 @@ ESQL;
 
     public function post($dbc, $args, $posted) {
 	$posted['client_id']  = 2;
-	$posted['name'] = 'aapolonius';
-	$posted['cc_login']  = 'Caeser';
-	$posted['name'] = 'aapolonius';
-	$posted['cc_status'] = 'active';
-	$posted['annual_fee'] = 100;
-	$posted['credit_limit'] = 200;
         $values = [];
         $values[$this->idcol_] = getArrayVal( $posted, $this->idcol_);
         $insertCols = explode(',', 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card');
@@ -153,6 +147,17 @@ ESQL;
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
         return [$this->idcol_ => $id];
+    }
+    
+    public static function account_decrypt( $data) {
+        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, print_r($data,1)));
+        $account = cryptutils::sslDecrypt($data['account']);
+        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, $account));
+        list($accnum, $accinfo, $accdate) = explode( '^', $account);
+        $data['account_num'] = $accnum;
+        $data['account_info'] = $accinfo;
+        $data['account_date'] = date("Y-m-d H:i:s", strtotime($accdate));
+        return $data;
     }
 
 }

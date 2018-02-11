@@ -22,7 +22,7 @@ class Client_AccountPost extends Base_dblayer {
         $accnum = preg_replace( '/[^\d]/', '', $this->posted_['account_num']);
         $accinfo = preg_replace( '/[^\d]/', '', $this->posted_['account_info']);
         $accdate = preg_replace( '/[^\d]/', '', $this->posted_['account_date']);
-        $account = sprintf( "%s^%s~%s", $accnum, $accinfo, $accdate);
+        $account = sprintf( "%s^%s^%s", $accnum, $accinfo, $accdate);
         $retStr = cryptutils::sslEncrypt ( $account);
         $dec = cryptutils::sslDecrypt( $retStr);
         error_log( $account);

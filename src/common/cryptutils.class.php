@@ -7,7 +7,7 @@ Class cryptutils {
 
   const defaultKeyBase64 = "VXS6nVbsmy+sY55jelwjoW+qDTYt/iMi3Vne01nDCwk=";
   
-  const cipher = 'id-aes256-GCM';
+  const cipher = 'aes-256-cbc';
   
   public static function getKeys($cfgfile, $section = 'crypt') {
     if (!$cryptsettings = utils::read_ini_section($cfgfile, $section)) {
@@ -30,8 +30,14 @@ Class cryptutils {
     }
    }
 //   error_log( json_encode([$data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv]));
-   $encrypt = openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_ZERO_PADDING, $iv);
-   error_log( $encrypt);
+   $t = openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
+   $encrypt = bin2hex($t);
+           
+   error_log( __METHOD__);
+   error_log( $data);
+   error_log($encrypt);
+   error_log( '---------------------------');
+//   error_log( sprintf( "%s %d] >>>%s<<< %s @@@ %s", __METHOD__, __LINE__, $encrypt, $key, $iv));
    return $encrypt;
   }
 
@@ -45,7 +51,14 @@ Class cryptutils {
         $iv = $keys['iv'];
     }
    }
-   return openssl_decrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA , $iv);
+   $t = hex2bin($data);
+   $decrypt = openssl_decrypt($t, cryptutils::cipher, $key, OPENSSL_RAW_DATA , $iv);
+   error_log( __METHOD__);
+   error_log( $data);
+   error_log( $decrypt);
+   error_log( '++++++++++++++++++++++');
+//   error_log( sprintf( "%s %d] %s XXX %s XXX %s", __METHOD__, __LINE__, $decrypt, $key, $iv));
+   return $decrypt;
   }
 
   public static function defaultKey() {

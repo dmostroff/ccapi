@@ -7,7 +7,11 @@ class Client_AccountGetAll extends Base_dblayer {
 
     public function run($args) {
         $dbc = $this->connect();
-        $data = $this->helper_->getAll($dbc);
+        $rows = $this->helper_->getAll($dbc);
+        $data = [];
+        foreach( $rows as $row) {
+            $data[] = $this->helper_->account_decrypt( $row);
+        }
         error_log( __METHOD__ . ',' . __LINE__ . ';' . json_encode($data));
         return $data;
     }

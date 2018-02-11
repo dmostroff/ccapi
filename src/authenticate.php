@@ -55,7 +55,7 @@ class Authenticate {
     // ...how we stored it
     $systok = self::KEYPREFIX_ . ':' . $tok;
     // ...can we find it in Redis?
-    error_log( $systok);
+//    error_log( $systok);
     $red = new Redis() ;
     $red->connect('localhost') ;
     if($red->exists($systok)) {

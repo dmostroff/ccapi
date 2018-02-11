@@ -72,27 +72,43 @@ ESQL;
             $id = $this->update($dbc, $values);
         } else {
             $sql = <<<ESQL
-    INSERT INTO cc_cards ( cc_company_id
+    WITH parms AS (
+        ? as cc_company_id
+	, ? as card_name
+	, ? as version
+	, ? as annual_fee
+	, ? as first_year_free
+    ), upd AS (
+      UPDATE cc_cards
+      SET cc_company_id = parms.cc_company_id
+	, card_name = parms.card_name
+	, version = parms.version
+	, annual_fee = parms.annual_fee
+	, first_year_free = parms.first_year_free
+      FROM parms
+      RETURNING cc_company_id
+    )
+    INSERT INTO cc_cards ( 
+        cc_company_id
 	, card_name
 	, version
 	, annual_fee
 	, first_year_free )
-    VALUES(?,?,?,?,?)
-    ON DUPLICATE KEY UPDATE cc_company_id = VALUES(cc_company_id)
-	, card_name = VALUES(card_name)
-	, version = VALUES(version)
-	, annual_fee = VALUES(annual_fee)
-	, first_year_free = VALUES(first_year_free)
-	
+    SELECT 
+        cc_company_id
+	, card_name
+	, version
+	, annual_fee
+	, first_year_free
+    FROM parms
+    RETURNING cc_company_id
 ESQL;
             $id = null;
             try {
 //            error_log($sql);
 //            error_log(print_r($values, 1));
                 dbconn::exec($dbc, $sql, $values);
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
+                $id = (isset($rows[0])) ? $rows[0]['cc_company_id'] : $values['cc_company_id'];
             } catch (Exception $ex) {
                 error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
             }
@@ -100,7 +116,7 @@ ESQL;
         return ['cc_card_id' => $id];
     }
 
-    public function delete($dbc, $ids) {
+    public function delete($dbc, $ids, $posted) {
         $sql = "DELETE FROM cc_cards WHERE cc_cards.cc_card_id=?";
         return dbconn::exec($dbc, $sql, [$args['cc_card_id']]);
     }
