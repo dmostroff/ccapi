@@ -39,6 +39,7 @@ ESQL;
 
     public function getAll( $dbc) {
         $sql=$this->getSelectSql();
+        $sql .= " ORDER BY cc_name";
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
      }
