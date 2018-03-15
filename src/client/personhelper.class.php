@@ -84,22 +84,23 @@ ESQL;
         }
         $sql = <<<ESQL
     WITH parms AS (
-      SELECT ? as client_id
-        , ? as last_name
-	, ? as first_name
-	, ? as middle_name
-	, ? as dob
-	, ? as gender
-	, ? as ssn
-	, ? as mmn
-	, ? as email
-	, ? as pwd
-	, ? as phone
-	, ? as phone_2
-	, ? as phone_cell
-	, ? as phone_fax
+      SELECT ?::integer as client_id
+        , ?::text as last_name
+        , ?::text as first_name
+        , ?::text as middle_name
+        , ?::date as dob
+        , ?::text as gender
+        , regexp_replace( ?, '[^\d]', '', 'g') as ssn
+        , ?::text as mmn
+        , ?::text as email
+        , ?::text as pwd
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_2
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_cell
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_fax
+        , ?::text as recorded_on
     ), upd AS (
-      UPDATE client_paerson
+      UPDATE client_person
       SET last_name = parms.last_name
 	, first_name = parms.first_name
 	, middle_name = parms.middle_name
@@ -115,7 +116,7 @@ ESQL;
 	, phone_fax = parms.phone_fax
       FROM parms
       WHERE client_person.client_id = parms.client_id
-      RETURNING *
+      RETURNING client_person.*
     ), ins AS (
      INSERT INTO client_person ( 
         last_name
@@ -145,27 +146,26 @@ ESQL;
 	, phone_2
 	, phone_cell
 	, phone_fax
-	, phone_official )
     FROM parms
     WHERE NOT EXISTS ( SELECT 1 from upd)
     RETURNING *
     )
-    SELECT upd.client_id
+    SELECT upd.*
     FROM upd
     UNION ALL
-    SELECT ins.client_id
+    SELECT ins.*
     FROM ins
 ESQL;
-        $id = null;
+        $rows = [];
         try {
-    //            error_log($sql);
-    //            error_log(print_r($values, 1));
+//                error_log($sql);
+//                error_log(print_r($values, 1));
             $rows = dbconn::exec($dbc, $sql, $values);
-            $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : $posted[$this->idcol_];
+//            $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : $posted[$this->idcol_];
         } catch (Exception $ex) {
             error_log(sprintf("!!! %s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
         }
-        return ['client_id' => $id];
+        return $rows;
     }
 
     public function delete($dbc, $ids, $posted) {
