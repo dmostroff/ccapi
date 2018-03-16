@@ -103,8 +103,8 @@ ESQL;
 	, ?::text as cc_login
 	, ?::text as cc_password
 	, ?::text as cc_status
-	, ?::numeric as annual_fee
-	, ?::numeric as credit_limit
+        , regexp_replace( ?, '[^\d|\.]', '', 'g')::numeric as annual_fee
+        , regexp_replace( ?, '[^\d|\.]', '', 'g')::numeric as credit_limit
 	, substr(?, 1,1)::text as addtional_card
     ), upd AS (
         UPDATE client_accounts
