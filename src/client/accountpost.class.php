@@ -28,6 +28,7 @@ class Client_AccountPost extends Base_dblayer {
         error_log( $account);
         error_log( $retStr);
         error_log( $dec);
+        error_log( $this->posted_['account_date']);
         return $retStr;
     }
 

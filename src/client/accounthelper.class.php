@@ -44,6 +44,7 @@ ESQL;
 
     public function getAll($dbc) {
         $sql = $this->getSelectSql();
+        $sql .= " ORDER BY 1";
         $rows = dbconn::exec($dbc, $sql);
         return $rows;
     }

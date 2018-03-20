@@ -13,6 +13,5 @@ class Client_AccountGet extends Base_dblayer {
         $data = $this->helper_->account_decrypt( $data);
         return $data;
     }
-
 }
 ?>
