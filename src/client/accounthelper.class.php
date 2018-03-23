@@ -84,7 +84,6 @@ ESQL;
     }
 
     public function post($dbc, $args, $posted) {
-	$posted['client_id']  = 2;
         $values = [];
         $values[$this->idcol_] = getArrayVal( $posted, $this->idcol_);
         $insertCols = explode(',', 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card');
@@ -123,24 +122,30 @@ ESQL;
         FROM parms
         WHERE client_accounts.account_id = parms.account_id
         RETURNING client_accounts.account_id
+    ), ins AS (
+        INSERT INTO client_accounts (  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card)
+        SELECT client_id
+            , name
+            , cc_card_id
+            , account
+            , account_info
+            , cc_login
+            , cc_password
+                , cc_status, annual_fee, credit_limit, addtional_card
+        FROM parms
+        WHERE NOT EXISTS (SELECT 1 FROM upd)
+        RETURNING client_accounts.account_id
     )
-    INSERT INTO client_accounts (  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card)
-    SELECT client_id
-        , name
-        , cc_card_id
-        , account
-        , account_info
-        , cc_login
-        , cc_password
-            , cc_status, annual_fee, credit_limit, addtional_card
-    FROM parms
-    WHERE NOT EXISTS (SELECT 1 FROM upd)
-    RETURNING client_accounts.account_id
+    SELECT account_id
+    FROM upd
+    UNION ALL
+    SELECT account_id
+    FROM ins
 ESQL;
         $id = null;
         try {
-            error_log( print_r($dbc, 1));
-            error_log($sql);
+//            error_log( print_r($dbc, 1));
+//            error_log($sql);
             error_log(print_r($values, 1));
             $rows = dbconn::exec($dbc, $sql, $values);
             $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : $values[$this->idcol_];
