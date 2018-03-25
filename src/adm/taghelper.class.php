@@ -51,9 +51,9 @@ ESQL;
         return $rows;
     } // post
     
-    public function delete( $dbc, $vals) {
+    public function delete( $dbc, $args, $posted) {
         $sql = "DELETE FROM adm_tags WHERE prefix = ? AND tag = ?";
-        $values = [$vals['prefix'], $vals['tag']];
+        $values = [$posted['prefix'], $posted['tag']];
         $rows = dbconn::exec($dbc, $sql, $values);
         error_log( print_r($values,1));
         error_log( print_r($rows,1));

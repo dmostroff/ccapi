@@ -80,58 +80,93 @@ ESQL;
           $col = trim($col);
           $values[$col] = getArrayVal($posted, $col);
         }
-        if( 0 < $posted['cc_company_id']) {
+        if( 0 < $posted[$this->idcol_]) {
             $values[$this->idcol_] = $posted[$this->idcol_];
             $id = $this->update( $dbc, $values);
         } else {
             $sql = <<<ESQL
-    INSERT INTO cc_company ( cc_name
-	, url
-	, contact
-	, address_1
-	, address_2
-	, city
-	, state
-	, zip
-	, country
-	, phone
-	, phone_2
-	, phone_cell
-	, phone_fax )
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-    ON DUPLICATE KEY UPDATE cc_name = VALUES(cc_name)
-	, url = VALUES(url)
-	, contact = VALUES(contact)
-	, address_1 = VALUES(address_1)
-	, address_2 = VALUES(address_2)
-	, city = VALUES(city)
-	, state = VALUES(state)
-	, zip = VALUES(zip)
-	, country = VALUES(country)
-	, phone = VALUES(phone)
-	, phone_2 = VALUES(phone_2)
-	, phone_cell = VALUES(phone_cell)
-	, phone_fax = VALUES(phone_fax)
-	
+    WITH parms AS (
+      SELECT ?::integer as {$this->idcol_}
+        , ?::text as cc_name
+	, ?::text as url
+	, ?::text as contact
+	, ?::text as address_1
+	, ?::text as address_2
+	, ?::text as city
+	, ?::text as state
+	, ?::text as zip
+	, ?::text as country
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_2
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_cell
+        , regexp_replace( ?, '[^\d]', '', 'g') as phone_fax
+    ), upd AS (
+      UPDATE cc_company
+      SET cc_name = parms.cc_name
+	, url = parms.url
+	, contact = parms.contact
+	, address_1 = parms.contact
+	, address_2 = parms.contact
+	, city = parms.contact
+	, state = parms.contact
+	, zip = parms.contact
+	, country = parms.contact
+	, phone = parms.contact
+	, phone_2 = parms.contact
+	, phone_cell = parms.contact
+	, phone_fax  = parms.contact
+      FROM parms
+      WHERE cc_company.{$this->idcol_} = parms.{$this->idcol_}
+      RETURNING cc_company.{$this->idcol_}
+    ), ins AS (
+        INSERT INTO cc_company ( 
+            cc_name
+            , url
+            , contact
+            , address_1
+            , address_2
+            , city
+            , state
+            , zip
+            , country
+            , phone
+            , phone_2
+            , phone_cell
+            , phone_fax
+        )
+        SELECT cc_name
+            , url
+            , contact
+            , address_1
+            , address_2
+            , city
+            , state
+            , zip
+            , country
+            , phone
+            , phone_2
+            , phone_cell
+            , phone_fax
+        FROM parms
+        RETURNING cc_company.{$this->idcol_}
+    )
+    SELECT {$this->idcol_}
+    FROM upd
+    UNION ALL
+    SELECT {$this->idcol_}
+    FROM ins
 ESQL;
             $id = null;
             try {
     //            error_log($sql);
     //            error_log(print_r($values, 1));
-                dbconn::exec($dbc, $sql, $values);
-                $sql1 = "SELECT last_insert_id() as id;";
-                $rows = dbconn::exec($dbc, $sql1);
-                $id = (isset($rows[0])) ? $rows[0]['id'] : null;
-                if( $id == 0) {
-                    $sql1 = "SELECT cc_company_id FROM cc_company WHERE cc_company.cc_company_id=?;";
-                    $rows = dbconn::exec($dbc, $sql1, [$posted['cc_company_id']]);
-                    $id = (isset($rows[0])) ? $rows[0]['cc_company_id'] : null;
-                }
+                $rows = dbconn::exec($dbc, $sql, $values);
+                $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : null;
             } catch (Exception $ex) {
                 error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
             }
         }
-        return ['cc_company_id' => $id] ;
+        return [$this->idcol_ => $id] ;
     }
 
     public function updateCompany( $dbc, $cc_company_id, $values ) {
