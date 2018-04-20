@@ -4,7 +4,7 @@ class Client_AccountHelper extends Base_dblayerHelper {
 
     public function __construct() {
         $this->table_ = 'client_accounts';
-        $this->colNames_ = 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card, recorded_on';
+        $this->colNames_ = 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card, open_date, close_date, notes, recorded_on';
         $this->idcol_ = 'account_id';
         parent::__construct();
     }
@@ -27,6 +27,9 @@ class Client_AccountHelper extends Base_dblayerHelper {
 	, client_accounts.annual_fee
 	, client_accounts.credit_limit
 	, client_accounts.addtional_card
+        , client_accounts.open_date
+        , client_accounts.close_date
+        , client_accounts.notes
 	, client_accounts.recorded_on
     FROM client_accounts
         INNER JOIN client_person ON client_person.client_id=client_accounts.client_id
@@ -66,6 +69,9 @@ ESQL;
 	, client_accounts.annual_fee
 	, client_accounts.credit_limit
 	, client_accounts.addtional_card
+        , client_accounts.open_date
+        , client_accounts.close_date
+        , client_accounts.notes
 	, client_accounts.recorded_on
         , client_person.first_name
         , client_person.middle_name
@@ -106,6 +112,9 @@ ESQL;
         , regexp_replace( ?, '[^\d|\.]', '', 'g')::numeric as annual_fee
         , regexp_replace( ?, '[^\d|\.]', '', 'g')::numeric as credit_limit
 	, substr(?, 1,1)::text as addtional_card
+        , ?::date as open_date
+        , ?::date as close_date
+	, ?::text as notes
     ), upd AS (
         UPDATE client_accounts
         SET client_id = parms.client_id
@@ -119,11 +128,29 @@ ESQL;
             , annual_fee = parms.annual_fee
             , credit_limit = parms.credit_limit
             , addtional_card = parms.addtional_card
+            , open_date = parms.open_date
+            , close_date = parms.close_date
+            , notes = parms.notes
         FROM parms
         WHERE client_accounts.account_id = parms.account_id
         RETURNING client_accounts.account_id
     ), ins AS (
-        INSERT INTO client_accounts (  client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card)
+        INSERT INTO client_accounts ( 
+            client_id
+            , name
+            , cc_card_id
+            , account
+            , account_info
+            , cc_login
+            , cc_password
+            , cc_status
+            , annual_fee
+            , credit_limit
+            , addtional_card
+            , open_date
+            , close_date
+            , notes    
+        )
         SELECT client_id
             , name
             , cc_card_id
@@ -131,7 +158,13 @@ ESQL;
             , account_info
             , cc_login
             , cc_password
-                , cc_status, annual_fee, credit_limit, addtional_card
+            , cc_status
+            , annual_fee
+            , credit_limit
+            , addtional_card
+            , open_date
+            , close_date
+            , notes    
         FROM parms
         WHERE NOT EXISTS (SELECT 1 FROM upd)
         RETURNING client_accounts.account_id
@@ -163,6 +196,7 @@ ESQL;
         $data['account_num'] = $accnum;
         $data['account_info'] = $accinfo;
         $data['account_date'] = date("Y-m-d H:i:s", strtotime($accdate));
+        $data['cc_password'] = cryptutils::sslDecrypt($data['cc_password']);
         return $data;
     }
 

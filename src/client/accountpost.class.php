@@ -10,6 +10,7 @@ class Client_AccountPost extends Base_dblayer {
         error_log(__METHOD__ . ':' . json_encode($this->posted_));
         $this->posted_['account_date'] = date( 'Y-m-d', strtotime($this->posted_['account_date']));
         $this->posted_['account'] = $this->accrypt();
+        $this->posted_['cc_password'] = cryptutils::sslEncrypt($this->posted_['cc_password']);
         $rows = $this->helper_->post($dbc, $args, $this->posted_);
         $data = null;
         if( isset($rows[$this->helper_->idcol_])) {
