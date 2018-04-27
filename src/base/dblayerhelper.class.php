@@ -28,7 +28,7 @@ class Base_dblayerHelper {
 
     public function getAll($dbc) {
         $sql = "SELECT {$this->idcol_}, {$this->colNames_} FROM {$this->table_}";
-        error_log($sql);
+        // error_log($sql);
         $retVal = dbconn::exec($dbc, $sql);
         return $retVal;
     }

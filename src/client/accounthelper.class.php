@@ -24,6 +24,7 @@ class Client_AccountHelper extends Base_dblayerHelper {
 	, client_accounts.cc_login
 	, client_accounts.cc_password
 	, client_accounts.cc_status
+        , tg.description as cc_status_desc
 	, client_accounts.annual_fee
 	, client_accounts.credit_limit
 	, client_accounts.addtional_card
@@ -34,15 +35,24 @@ class Client_AccountHelper extends Base_dblayerHelper {
     FROM client_accounts
         INNER JOIN client_person ON client_person.client_id=client_accounts.client_id
         LEFT OUTER JOIN cc_cards ON cc_cards.cc_card_id=client_accounts.cc_card_id
+        LEFT OUTER JOIN adm_tags tg ON tg.prefix = 'CARDSTATUS' AND tg.tag = client_accounts.cc_status
 ESQL;
         return $sql;
     }
-
+    
     public function getFkSql() {
         $sql = <<<ESQL
 INNER JOIN client_person ON client_accounts.client_id=client_person.client_id
 ESQL;
         return $sql;
+    }
+
+    public function get($dbc) {
+        $sql = $this->getSelectSql();
+        $sql .= sprintf( " WHERE %s.%s = ?", $this->table_, $this->idcol_);
+        $rows = dbconn::exec($dbc, $sql, [$args[$this->idcol_]]);
+        $retVal = (isset($rows[0])) ? $rows[0] : null;
+        return $retVal;
     }
 
     public function getAll($dbc) {
@@ -92,7 +102,9 @@ ESQL;
     public function post($dbc, $args, $posted) {
         $values = [];
         $values[$this->idcol_] = getArrayVal( $posted, $this->idcol_);
-        $insertCols = explode(',', 'client_id, name, cc_card_id, account, account_info, cc_login, cc_password, cc_status, annual_fee, credit_limit, addtional_card');
+        $insertCols = ['client_id', 'name', 'cc_card_id', 'account', 'account_info'
+            , 'cc_login', 'cc_password', 'cc_status'
+            , 'annual_fee', 'credit_limit', 'addtional_card', 'open_date', 'close_date', 'notes'];
         foreach ($insertCols as $col) {
             $col = trim($col);
             $values[$col] = getArrayVal($posted, $col);

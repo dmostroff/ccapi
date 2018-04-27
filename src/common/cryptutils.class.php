@@ -33,15 +33,17 @@ Class cryptutils {
    $t = openssl_encrypt($data, cryptutils::cipher, $key, OPENSSL_RAW_DATA, $iv);
    $encrypt = bin2hex($t);
            
-   error_log( __METHOD__);
-   error_log( $data);
-   error_log($encrypt);
-   error_log( '---------------------------');
+//   error_log( __METHOD__);
+//   error_log( $data);
+//   error_log($encrypt);
+//   error_log( '---------------------------');
 //   error_log( sprintf( "%s %d] >>>%s<<< %s @@@ %s", __METHOD__, __LINE__, $encrypt, $key, $iv));
    return $encrypt;
   }
 
   public static function sslDecrypt( $data, $key=null, $iv=null) {
+   $data = trim($data);
+   if( empty($data)) { return $data; }
    if( empty($key) || empty($iv)) {
     $keys = self::getKeys(Config::CFG_INI_FILENAME);
     if( empty($key)) {
@@ -51,12 +53,14 @@ Class cryptutils {
         $iv = $keys['iv'];
     }
    }
+   if( 0 != (strlen( $data) % 2)) {
+       $data .= '0';
+   }
    $t = hex2bin($data);
    $decrypt = openssl_decrypt($t, cryptutils::cipher, $key, OPENSSL_RAW_DATA , $iv);
-   error_log( __METHOD__);
-   error_log( $data);
-   error_log( $decrypt);
-   error_log( '++++++++++++++++++++++');
+//   error_log( __METHOD__);
+//   error_log( $data);
+//   error_log( $decrypt);
 //   error_log( sprintf( "%s %d] %s XXX %s XXX %s", __METHOD__, __LINE__, $decrypt, $key, $iv));
    return $decrypt;
   }

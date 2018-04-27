@@ -23,7 +23,7 @@ spl_autoload_register(function ($class) {
         require_once '../src/common/' . $class . '.class.php';
         return;
     }
-    error_log( '>' . $class);
+    // error_log( '>' . $class);
     try {
         $file = explode("_", $class);
         if ($file[0] && $file[1]) {

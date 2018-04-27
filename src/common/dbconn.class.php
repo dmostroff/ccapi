@@ -29,7 +29,7 @@ if (!class_exists('dbconn')) {
                 throw new exception(sprintf("Unable to open %s", $cfgfile));
             }
 
-            error_log(print_r($dbsettings, 1));
+            // error_log(print_r($dbsettings, 1));
             $dbsettings['driver'] = utils::getArrayVal($dbsettings, 'driver', 'pqsql');
             $dbsettings['host'] = utils::getArrayVal($dbsettings, 'host', 'localhost');
             $dbsettings['port'] = utils::getArrayVal($dbsettings, 'port', '5432');
@@ -41,7 +41,7 @@ if (!class_exists('dbconn')) {
                     , $dbsettings['port']
                     , $dbsettings['dbname']
             );
-            error_log( $dns);
+            // error_log( $dns);
             return new PDO($dns, $dbsettings['username'], $dbsettings['password']);
         }
 
