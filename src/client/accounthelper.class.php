@@ -47,7 +47,7 @@ ESQL;
         return $sql;
     }
 
-    public function get($dbc) {
+    public function get($dbc, $args) {
         $sql = $this->getSelectSql();
         $sql .= sprintf( " WHERE %s.%s = ?", $this->table_, $this->idcol_);
         $rows = dbconn::exec($dbc, $sql, [$args[$this->idcol_]]);
@@ -208,7 +208,6 @@ ESQL;
         $data['account_num'] = $accnum;
         $data['account_info'] = $accinfo;
         $data['account_date'] = date("Y-m-d H:i:s", strtotime($accdate));
-        $data['cc_password'] = cryptutils::sslDecrypt($data['cc_password']);
         return $data;
     }
 
