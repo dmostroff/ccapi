@@ -1,5 +1,5 @@
 <?php
-class Client_AccountGet extends Base_dblayer {
+class Account_AccountGet extends Base_dblayer {
 
     public function __construct() {
         $this->helper_ = new Account_AccountHelper();
