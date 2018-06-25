@@ -81,8 +81,7 @@ ESQL;
           $values[$col] = getArrayVal($posted, $col);
         }
         if( 0 < $posted[$this->idcol_]) {
-            $values[$this->idcol_] = $posted[$this->idcol_];
-            $id = $this->update( $dbc, $values);
+            $id = $this->updateCompany( $dbc, $posted[$this->idcol_], $values);
         } else {
             $sql = <<<ESQL
     WITH parms AS (
@@ -182,13 +181,14 @@ ESQL;
             , state = ?
             , zip = ?
             , country = coalesce( ?, 'US')
-            , phone = ?
-            , phone_2 = ?
-            , phone_cell = ?
-            , phone_fax = ?
+            , phone = regexp_replace( ?, '[^\d]', '', 'g')
+            , phone_2 = regexp_replace( ?, '[^\d]', '', 'g')
+            , phone_cell = regexp_replace( ?, '[^\d]', '', 'g')
+            , phone_fax = regexp_replace( ?, '[^\d]', '', 'g')
         WHERE cc_company_id = ?
 ESQL;
         try {
+            $values[] = $cc_company_id;
             dbconn::exec($dbc, $sql, $values);
         } catch (Exception $ex) {
             error_log(sprintf("%s %s %s", $ex->getFile(), $ex->getLine(), $ex->getMessage()));
@@ -196,7 +196,7 @@ ESQL;
         return $cc_company_id;
     }
     
-    public function delete($dbc, $ids) {
+    public function delete($dbc, $args, $posted) {
         $sql = "DELETE FROM cc_company WHERE cc_company.cc_company_id=?";
         return dbconn::exec($dbc, $sql, [$args['cc_company_id']]);
     }

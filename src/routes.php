@@ -58,20 +58,34 @@ $app->post('/admin/users/login', new FileLoad($app, '', 'Adm_UsersLogin'))->setN
 $app->post('/admin/users/logout', new FileLoad($app, '', 'Adm_UsersLogout'))->setName('AdmUsersLogout');
 $app->delete('/admin/users', new FileLoad($app, '', 'Adm_UsersDelete'))->setName('AdmUsersDelete');
 
+/* ------------------------------------------------------------
+ * Account
+ ------------------------------------------------------------*/
+$app->get('/account', new FileLoad($app, '', 'Account_AccountGetAll'))->setName('AccountGetAll');
+$app->get('/account/person/{client_id:\d+}', new FileLoad($app, '', 'Account_AccountPersonGet'))->setName('AccountPersonGet');
+$app->get('/account/{account_id:\d+}', new FileLoad($app, '', 'Account_AccountGet'))->setName('AccountGet');
+$app->post('/account', new FileLoad($app, '', 'Account_AccountPost'))->setName('AccountPost');
+$app->delete('/account', new FileLoad($app, '', 'Account_AccountDelete'))->setName('AccountDelete');
+
+$app->get('/account/baltransferinfo', new FileLoad($app, '', 'Account_BaltransferinfoGetAll'))->setName('AccountBaltransferinfoGetAll');
+$app->get('/account/baltransferinfo/{bal_id}', new FileLoad($app, '', 'Account_BaltransferinfoGet'))->setName('AccountBaltransferinfoGet');
+$app->post('/account/baltransferinfo', new FileLoad($app, '', 'Account_BaltransferinfoPost'))->setName('AccountBaltransferinfoPost');
+$app->delete('/account/baltransferinfo', new FileLoad($app, '', 'Account_BaltransferinfoDelete'))->setName('AccountBaltransferinfoDelete');
+
+$app->get('/account/cc/actions', new FileLoad($app, '', 'Account_CcActionsGetAll'))->setName('ClientCcActionsGetAll');
+$app->get('/account/cc/actions/{ccaction_id}', new FileLoad($app, '', 'Account_CcActionsGet'))->setName('ClientCcActionsGet');
+$app->post('/account/cc/actions', new FileLoad($app, '', 'Account_CcActionsPost'))->setName('ClientCcActionsPost');
+$app->delete('/account/cc/actions', new FileLoad($app, '', 'Account_CcActionsDelete'))->setName('ClientCcActionsDelete');
+
+$app->get('/account/cc/transactions', new FileLoad($app, '', 'Account_TransactionsGetAll'))->setName('AccountTransactionsGetAll');
+$app->get('/account/cc/transactions/{cctrans_id}', new FileLoad($app, '', 'Account_TransactionsGet'))->setName('AccountTransactionsGet');
+$app->post('/account/cc/transactions', new FileLoad($app, '', 'Account_TransactionsPost'))->setName('Account_TransactionsPost');
+$app->delete('/account/cc/transactions', new FileLoad($app, '', 'Account_TransactionsDelete'))->setName('Account_TransactionsDelete');
+
 
 /* ------------------------------------------------------------
  * Cc
  ------------------------------------------------------------*/
-$app->get('/cc/action', new FileLoad($app, '', 'Cc_ActionGetAll'))->setName('CcActionGetAll');
-$app->get('/cc/action/{ccaction_id}', new FileLoad($app, '', 'Cc_ActionGet'))->setName('CcActionGet');
-$app->post('/cc/action', new FileLoad($app, '', 'Cc_ActionPost'))->setName('CcActionPost');
-$app->delete('/cc/action', new FileLoad($app, '', 'Cc_ActionDelete'))->setName('CcActionDelete');
-
-$app->get('/cc/baltransferinfo', new FileLoad($app, '', 'Cc_BaltransferinfoGetAll'))->setName('CcBaltransferinfoGetAll');
-$app->get('/cc/baltransferinfo/{bal_id}', new FileLoad($app, '', 'Cc_BaltransferinfoGet'))->setName('CcBaltransferinfoGet');
-$app->post('/cc/baltransferinfo', new FileLoad($app, '', 'Cc_BaltransferinfoPost'))->setName('CcBaltransferinfoPost');
-$app->delete('/cc/baltransferinfo', new FileLoad($app, '', 'Cc_BaltransferinfoDelete'))->setName('CcBaltransferinfoDelete');
-
 $app->get('/cc/cards', new FileLoad($app, '', 'Cc_CardsGetAll'))->setName('CcCardsGetAll');
 $app->get('/cc/cards/{cc_card_id}', new FileLoad($app, '', 'Cc_CardsGet'))->setName('CcCardsGet');
 $app->post('/cc/cards', new FileLoad($app, '', 'Cc_CardsPost'))->setName('CcCardsPost');
@@ -84,11 +98,6 @@ $app->post('/cc/company', new FileLoad($app, '', 'Cc_CompanyPost'))->setName('Cc
 $app->delete('/cc/company', new FileLoad($app, '', 'Cc_CompanyDelete'))->setName('CcCompanyDelete');
 
 $app->get('/cc/company/cards/{cc_company_id}', new FileLoad($app, '', 'Cc_CompanyCards'))->setName('CcCompanyCards');
-
-$app->get('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionGetAll'))->setName('CcTransactionGetAll');
-$app->get('/cc/transaction/{cctrans_id}', new FileLoad($app, '', 'Cc_TransactionGet'))->setName('CcTransactionGet');
-$app->post('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionPost'))->setName('CcTransactionPost');
-$app->delete('/cc/transaction', new FileLoad($app, '', 'Cc_TransactionDelete'))->setName('CcTransactionDelete');
 
 /* ------------------------------------------------------------
  * Client
@@ -108,12 +117,6 @@ $app->get('/client/cc', new FileLoad($app, '', 'Client_CcGetAll'))->setName('Cli
 $app->get('/client/cc/{clicc_id}', new FileLoad($app, '', 'Client_CcGet'))->setName('ClientCcGet');
 $app->post('/client/cc', new FileLoad($app, '', 'Client_CcPost'))->setName('ClientCcPost');
 $app->delete('/client/cc', new FileLoad($app, '', 'Client_CcDelete'))->setName('ClientCcDelete');
-
-$app->get('/client/accounts', new FileLoad($app, '', 'Client_AccountGetAll'))->setName('ClientAccountGetAll');
-$app->get('/client/accounts/person/{client_id}', new FileLoad($app, '', 'Client_AccountPersonGet'))->setName('ClientAccountPersonGet');
-$app->get('/client/accounts/{account_id}', new FileLoad($app, '', 'Client_AccountGet'))->setName('ClientAccountGet');
-$app->post('/client/accounts', new FileLoad($app, '', 'Client_AccountPost'))->setName('ClientAccountPost');
-$app->delete('/client/accounts', new FileLoad($app, '', 'Client_AccountDelete'))->setName('ClientAccountDelete');
 
 $app->get('/client/cchistory', new FileLoad($app, '', 'Client_CchistoryGetAll'))->setName('ClientCchistoryGetAll');
 $app->get('/client/cchistory/{cchist_id}', new FileLoad($app, '', 'Client_CchistoryGet'))->setName('ClientCchistoryGet');

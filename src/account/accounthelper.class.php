@@ -1,6 +1,6 @@
 <?php
 
-class Client_AccountHelper extends Base_dblayerHelper {
+class Account_AccountHelper extends Base_dblayerHelper {
 
     public function __construct() {
         $this->table_ = 'client_accounts';

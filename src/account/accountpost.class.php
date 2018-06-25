@@ -1,8 +1,8 @@
 <?php
-class Client_AccountPost extends Base_dblayer {
+class Account_AccountPost extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Client_AccountHelper();
+        $this->helper_ = new Account_AccountHelper();
     }
 
     public function run($args) {

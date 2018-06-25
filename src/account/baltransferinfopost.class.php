@@ -1,8 +1,8 @@
 <?php
-class Cc_ActionPost extends Base_dblayer {
+class Account_BaltransferinfoPost extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Cc_ActionHelper();
+        $this->helper_ = new Account_BaltransferinfoHelper();
     }
 
     public function run($args) {

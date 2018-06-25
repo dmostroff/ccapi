@@ -1,14 +1,12 @@
 <?php
-class Client_AccountDelete extends Base_dblayer {
+class Account_BaltransferinfoDelete extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Client_AccountHelper();
+        $this->helper_ = new Account_BaltransferinfoHelper();
     }
 
     public function run($args) {
         $dbc = $this->connect();
-        error_log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-        error_log(print_r($this->posted_,1));
         $data = $this->helper_->delete($dbc, $args, $this->posted_);
         return $data;
     }

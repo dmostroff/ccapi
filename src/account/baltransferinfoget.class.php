@@ -1,8 +1,8 @@
 <?php
-class Cc_BaltransferinfoGet extends Base_dblayer {
+class Account_BaltransferinfoGet extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Cc_BaltransferinfoHelper();
+        $this->helper_ = new Account_BaltransferinfoHelper();
     }
 
     public function run($args) {

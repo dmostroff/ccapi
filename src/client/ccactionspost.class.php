@@ -1,8 +1,8 @@
 <?php
-class Cc_TransactionPost extends Base_dblayer {
+class Clients_CcActionsPost extends Base_dblayer {
 
     public function __construct() {
-        $this->helper_ = new Cc_TransactionHelper();
+        $this->helper_ = new Client_CcActionsHelper();
     }
 
     public function run($args) {

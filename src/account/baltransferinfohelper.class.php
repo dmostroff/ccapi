@@ -1,5 +1,5 @@
 <?php
-class Cc_BaltransferinfoHelper extends Base_dblayerHelper {
+class Account_BaltransferinfoHelper extends Base_dblayerHelper {
 
     public function __construct() {
         $this->table_ = 'cc_baltransferinfo';
