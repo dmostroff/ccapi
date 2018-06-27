@@ -109,7 +109,6 @@ ESQL;
             $col = trim($col);
             $values[$col] = getArrayVal($posted, $col);
         }
-        error_log(json_encode($values));
         $sql = <<<ESQL
     WITH parms AS (
         SELECT ?::integer as account_id
@@ -191,7 +190,7 @@ ESQL;
         try {
 //            error_log( print_r($dbc, 1));
 //            error_log($sql);
-            error_log(print_r($values, 1));
+            error_log(__METHOD__ . ':' . print_r($values, 1));
             $rows = dbconn::exec($dbc, $sql, $values);
             $id = (isset($rows[0])) ? $rows[0][$this->idcol_] : $values[$this->idcol_];
         } catch (Exception $ex) {
@@ -201,9 +200,9 @@ ESQL;
     }
     
     public static function account_decrypt( $data) {
-        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, print_r($data,1)));
+//        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, print_r($data,1)));
         $account = cryptutils::sslDecrypt($data['account']);
-        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, $account));
+//        error_log( sprintf("%s %d] %s", __METHOD__, __LINE__, $account));
         list($accnum, $accinfo, $accdate) = explode( '^', $account);
         $data['account_num'] = $accnum;
         $data['account_info'] = $accinfo;
